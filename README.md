@@ -9,7 +9,7 @@ See the [MSYS2 wiki](https://github.com/msys2/msys2/wiki).
 
 ## Using packages
 
-Second option is to download or clone the package folder with the scripts to your machine and you **build it for yourself**.
+Download or clone the package folder with the scripts to your machine and build for yourself.
 
  Assuming you have a properly installed MSYS2 environment and build tools, you can build any package using the following command:
  ```
