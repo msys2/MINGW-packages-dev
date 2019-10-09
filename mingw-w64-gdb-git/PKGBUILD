@@ -6,7 +6,7 @@ _realname=gdb
 _branch=gdb-8.3-branch
 _gcc_ver=$(gcc -v 2>&1 | grep "^gcc version" | head -n1 | cut -c 13- | sed -r "s/\\s.*$//")
 pkgbase=mingw-w64-${_realname}-git
-pkgver=r96941.84c6580c90
+pkgver=r97042.25016ffd0b
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
 replaces=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}=${pkgver}")
@@ -85,10 +85,12 @@ build() {
 
   if check_option "debug" "y"; then
     CFLAGS+=" -O0"
+    CXXFLAGS+=" -O0"
   fi
 
   CFLAGS+=" -pthread"
-  LDFLAGS+=" -pthread"
+  CXXFLAGS+=" -pthread"
+  LDFLAGS+=" -pthread -fstack-protector"
 
   [[ -d ${srcdir}/build-${MINGW_CHOST} ]] && rm -rf ${srcdir}/build-${MINGW_CHOST}
 
