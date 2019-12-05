@@ -4,7 +4,7 @@ _realname=imgui
 pkgbase=mingw-w64-${_realname}-git
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=v1.73.r1.4b2287d5
+pkgver=v1.75.r1.d6f84002
 pkgrel=1
 pkgdesc="Bloat-free Immediate Mode Graphical User interface for C++ with minimal dependencies (mingw-w64)"
 arch=('any')
@@ -43,6 +43,7 @@ build() {
     -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
     -DImGui_OPENGL_LOADER=GLEW \
     -DImGui_EXAMPLES=OFF \
+    -DImGui_TOOLS=ON \
     ../${_realname}/examples
   make
 }
