@@ -1,18 +1,17 @@
-From 84df2d70e95c8ce33b1e266a0efb7188b807459f Mon Sep 17 00:00:00 2001
+From 4838b842a95357914b9e6c894768d3c18a84a49f Mon Sep 17 00:00:00 2001
 From: Liu Hao <lh_mouse@126.com>
 Date: Sun, 21 Jul 2019 00:06:24 +0800
 Subject: [PATCH] Backport patches from mingw-w64-gdb.
 
 ---
- gdb/configure       |  2 +-
- gdb/python/python.c | 11 +++++++++++
- 2 files changed, 12 insertions(+), 1 deletion(-)
+ gdb/configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gdb/configure b/gdb/configure
-index 854837c50a..a427a61ada 100755
+index 324eb50944..9bea7ae63a 100755
 --- a/gdb/configure
 +++ b/gdb/configure
-@@ -10499,7 +10499,7 @@ fi
+@@ -10488,7 +10488,7 @@ fi
          as_fn_error $? "failure running python-config --ldflags" "$LINENO" 5
        fi
      fi
@@ -21,35 +20,6 @@ index 854837c50a..a427a61ada 100755
      if test $? != 0; then
        have_python_config=failed
        if test "${with_python}" != auto; then
-diff --git a/gdb/python/python.c b/gdb/python/python.c
-index c23db2c126..0b16e04932 100644
---- a/gdb/python/python.c
-+++ b/gdb/python/python.c
-@@ -338,6 +338,9 @@ python_run_simple_file (FILE *file, const char *filename)
- 
-   /* Because we have a string for a filename, and are using Python to
-      open the file, we need to expand any tilde in the path first.  */
-+
-+#ifndef IS_PY3K
-+
-   gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-   gdbpy_ref<> python_file (PyFile_FromString (full_path.get (), (char *) "r"));
-   if (python_file == NULL)
-@@ -348,6 +351,14 @@ python_run_simple_file (FILE *file, const char *filename)
- 
-   PyRun_SimpleFile (PyFile_AsFile (python_file.get ()), filename);
- 
-+#else
-+
-+  /* Python 3 no loner exposes FILE structs, so we are out of luck */
-+  gdb::unique_xmalloc_ptr<char> full_path (tilde_expand (filename));
-+  PyRun_SimpleFile (fopen (full_path.get(), "r"), filename);
-+
-+#endif
-+
- #endif /* _WIN32 */
- }
- 
 -- 
-2.22.0
+2.24.1
 
