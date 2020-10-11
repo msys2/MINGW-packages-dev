@@ -2,11 +2,11 @@
 # Contributor: Ray Donnelly <mingw.android@gmail.com>
 
 _realname=binutils
-_base_ver=2.25
+_base_ver=2.35
 pkgbase=mingw-w64-${_realname}-git
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
 # replaces="${MINGW_PACKAGE_PREFIX}-${_realname}=${_base_ver}"
-pkgver=2.25.r82131.aae60b2
+pkgver=2.35.1.r102542.bbbeba06dd9
 pkgrel=1
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}=${pkgver}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
@@ -21,31 +21,43 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-libiconv" "${MINGW_PACKAGE_PREFIX}-zlib" "
 options=('staticlibs' '!distcc' '!ccache' 'debug' '!strip')
 #install=binutils.install
 source=("${_realname}"::"git+https://sourceware.org/git/binutils-gdb.git#branch=${_realname}-${_base_ver//./_}-branch"
-        0001-MinGW-w64-Two-fixes-for-unusual-files.patch
-        0002-MinGW-w64-Fix-libiberty-makefile.patch
-        0003-MinGW-w64-Fix-libibery-configure.patch
-        0004-MinGW-w64-Use-gnu-printf.patch
-        0005-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch)
+        0001-enable-gold-on.mingw32.patch
+        0002-check-for-unusual-file-harder.patch
+        0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
+        0020-binutils_2.31_mkdtemp_impl.patch
+        0110-binutils-mingw-gnu-print.patch
+        0120-windres-handle-spaces.patch)
 sha256sums=('SKIP'
-            '6f3b8bdaa41b3d2a7ab98fb819872fa988ebab580daf21522c32012530465e95'
-            '5b65eb12154216ccef02c93417468fedd2dd6b9029bb392e5616793136c1abb4'
-            '80a0934e863a211b4d76dcf24e8d61841b06d1f8094f3d657d46e337cae6c7f4'
-            '824d4cd28976127e0164216c0770bcad0aea29c95805e1e883f93a2cfc4ace3c'
-            'bd38317b28b894d5c0e0ba043fc2445af415f6e96bb9ac93c348748d21a43625')
+            '93296b909e1a4f9d8a4bbe2437aafa17ca565ef6642a9812b0360c05be228c9d'
+            '2c99345fc575c3a060d6677537f636c6c4154fac0fde508070f3b6296c1060d4'
+            '604e76e0f702ced493ee22aa3c1768b4776b2008a7d70ae0dd35fe5be3522141'
+            '34ba6c001ff7f95ae1da0619c73130112b76d0d2a31bb8a00602eb22f1f84cb8'
+            '76658ef1bb8c5fc3fe6c26e2b5dd9ee0f1d12661988c0c65562b0a3e2d32ae1f'
+            '86ae90d997e986a54aaebb5251f3a71800b0c5c3f5b57b9094a42995e9f5c478')
+
+# Declare global variables; begin with underscore to avoid name conflicts
+_git_base_commit=
 
 pkgver() {
   cd "$srcdir/$_realname"
-  printf "%s.r%s.%s" "${_base_ver}" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+
+  _bfd_version=$(head -n 3 bfd/version.m4 | grep 'BFD_VERSION' | sed -e 's/.* //' | tr -d '[])' | tr '\n' '.' | sed 's/.$/\n/')
+
+  printf "%s.r%s.%s" "${_bfd_version}" "$(git rev-list --count ${_git_base_commit})" "$(git rev-parse --short ${_git_base_commit})"
 }
 
 prepare() {
   cd ${srcdir}/${_realname}
-  git am "${srcdir}"/0001-MinGW-w64-Two-fixes-for-unusual-files.patch
-  git am "${srcdir}"/0002-MinGW-w64-Fix-libiberty-makefile.patch
-  git am "${srcdir}"/0003-MinGW-w64-Fix-libibery-configure.patch
-  git am "${srcdir}"/0004-MinGW-w64-Use-gnu-printf.patch
-  git am "${srcdir}"/0005-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
-  rm -rf gdb readline libdecnumber sim
+
+  _git_base_commit=$(git rev-parse HEAD)
+
+  git am "${srcdir}"/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch
+  patch -p1 -i "${srcdir}"/0001-enable-gold-on.mingw32.patch
+  patch -p1 -i "${srcdir}"/0002-check-for-unusual-file-harder.patch
+  patch -p1 -i "${srcdir}"/0020-binutils_2.31_mkdtemp_impl.patch
+  patch -p1 -i "${srcdir}"/0110-binutils-mingw-gnu-print.patch
+  patch -p1 -i "${srcdir}"/0120-windres-handle-spaces.patch
+  rm -rf gdb gdbserver gdbsupport readline libdecnumber sim
 }
 
 build() {
