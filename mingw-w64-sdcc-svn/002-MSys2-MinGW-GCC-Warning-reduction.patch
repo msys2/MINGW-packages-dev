@@ -1,0 +1,38 @@
+From c90365fe65ec9f6a5aba7b880a828e4289d94540 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Thu, 10 Sep 2020 17:07:49 -0400
+Subject: MSys2 MinGW GCC Warning reduction
+
+This patch helps to prevent segfaults under MSys2 with 
+__USE_MINGW_ANSI_STDIO = 1 and 64 bit build.
+
+This patch is a work around on an MSys2 GCC MinGW issue.
+So, do not try again to push change upstream to the SDCC people.
+Try getting an different GCC patch accepted by the MSys2 packagers and
+then the MinGW64 people.
+---
+ sdcc/support/util/dbuf_string.h | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/sdcc/support/util/dbuf_string.h b/sdcc/support/util/dbuf_string.h
+index 70e9562ed..ba5f77928 100644
+--- a/sdcc/support/util/dbuf_string.h
++++ b/sdcc/support/util/dbuf_string.h
+@@ -41,7 +41,15 @@
+    are accepted by gcc versions 2.6.4 (effectively 2.7) and later.  */
+ #ifndef ATTRIBUTE_PRINTF
+ # if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+-#  define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (__printf__, m, n))) ATTRIBUTE_NONNULL(m)
++#   ifndef _WIN32
++#     define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (__printf__, m, n))) ATTRIBUTE_NONNULL(m)
++#   else
++#     if defined(__USE_MINGW_ANSI_STDIO) && __USE_MINGW_ANSI_STDIO != 0
++#       define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (__gnu_printf__, m, n))) ATTRIBUTE_NONNULL(m)
++#     else
++#       define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (__ms_printf__, m, n))) ATTRIBUTE_NONNULL(m)
++#     endif
++#   endif
+ #else
+ #  define ATTRIBUTE_PRINTF(m, n)
+ # endif /* GNUC >= 2.7 */
+-- 

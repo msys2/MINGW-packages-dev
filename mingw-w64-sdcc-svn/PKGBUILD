@@ -1,0 +1,136 @@
+# Contributer: Tim Stahlhut <stahta01@gmail.com>
+
+# Search for "Segmentation fault", "error:", and "Error 127" in all of build, check, package logs
+
+_realname=sdcc
+pkgbase=mingw-w64-${_realname}-svn
+pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}-svn
+pkgver=4.0.4.r11943
+pkgrel=1
+pkgdesc="Retargettable ANSI C compiler [Intel 8051, Maxim 80DS390, Zilog Z80 and the Motorola 68HC08] (mingw-w64)"
+arch=('any')
+url='https://sourceforge.net/projects/sdcc/'
+license=('GPL') # pic14 and pic16 has non free headers and likely other non free files
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs") # 'boost-libs'
+checkdepends=("${MINGW_PACKAGE_PREFIX}-python")
+# Since latest gputils release is about 4 years old, decided to disable pic14 and pic16 support.
+makedepends=('flex' 'bison' 'diffutils' 'make' 'patch' 'perl' 'svn' 'texinfo' "${MINGW_PACKAGE_PREFIX}-boost") # "${MINGW_PACKAGE_PREFIX}-gputils"
+url="http://sdcc.sourceforge.net/"
+options=('debug' '!strip' 'staticlibs' 'buildflags')
+
+_svntrunk=https://svn.code.sf.net/p/sdcc/code/trunk/sdcc
+
+source=('001-ucsim-comment-out-vsnprintf-prototype.patch' 
+        '903-Bug-23142-SIGSEGV-in-is_strip_section.patch'
+        '002-MSys2-MinGW-GCC-Warning-reduction.patch'
+        '003-MSys2-sdbinutils-add-USE_MINGW_ANSI_STDIO-guard.patch')
+sha256sums=('e2aca7855ad6a0db55e8a4b6f7a6490d12d80ae3aed4e0f254c0e0a5a6fd7abe'
+            'ee4b8da038bc7ecb71fc9f0f129136e6720719093f7faef1a72ee85fa506a618'
+            '6ec485ce3a4547cdd82001cc72704231d92d991af935b655eebd79df9816df5f'
+            'dae365730f708830256a9f64966521bc96bfec565c244f5a5c0492fea3a24185')
+
+# Helper macros to help make tasks easier #
+apply_patch_with_msg() {
+  for _patch in "$@"
+  do
+    msg2 "Applying $_patch"
+    patch -Nbp2 -i "${srcdir}/$_patch"
+  done
+}
+
+del_file_exists() {
+  for _fname in "$@"
+  do
+    if [ -f $_fname ]; then
+      rm -rf $_fname
+    fi
+  done
+}
+# ======================================= #
+
+prepare() {
+  mkdir -p "$srcdir/svn"
+  msg "Connecting to $_svntrunk SVN server...."
+  if [[ -d ${_realname}-svn/.svn ]]; then
+    msg "Cleanup SVN ...."
+    (cd ${_realname}-svn && svn cleanup)
+    msg "Reverting SVN ...."
+    (cd ${_realname}-svn && svn revert -R .)
+    msg "Updating SVN ...."
+    (cd ${_realname}-svn && svn up --username anonsvn --password anonsvn)
+  else
+    msg "Checking out SVN ...."
+    svn co --username anonsvn --password anonsvn $_svntrunk --config-dir ./svn ${_realname}-svn
+  fi
+
+  cd "$srcdir/${_realname}-svn"
+
+  apply_patch_with_msg \
+    001-ucsim-comment-out-vsnprintf-prototype.patch \
+    903-Bug-23142-SIGSEGV-in-is_strip_section.patch \
+    002-MSys2-MinGW-GCC-Warning-reduction.patch \
+    003-MSys2-sdbinutils-add-USE_MINGW_ANSI_STDIO-guard.patch
+}
+
+pkgver() {
+  cd "$srcdir/${_realname}-svn"
+  local rev="$(svnversion -n | tr -d 'M')"
+  _sdcc_version=$(head -n 1 .version | sed -e 's/.* //' | tr -d '"\n')
+  printf "%s.r%s" "$_sdcc_version" "$rev"
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+  mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
+
+  if [ "${CARCH}" = "x86_64" ]; then
+    LDFLAGS+=""
+  else
+    LDFLAGS+=" -Wl,--large-address-aware"
+  fi
+
+  if check_option "debug" "y"; then
+    local opt_flags=" -Og"
+    opt_flags+=" -ftree-ccp"
+    opt_flags+=" -ftree-bit-ccp"
+    opt_flags+=" -ftree-pta"
+    opt_flags+=" -fif-conversion2"
+    opt_flags+=" -finline-functions-called-once"
+    opt_flags+=" -fcaller-saves"
+    CFLAGS+=${opt_flags}
+    CXXFLAGS+=${opt_flags}
+#  else
+#    CFLAGS+=" -O2"
+#    CXXFLAGS+=" -O2" 
+  fi
+
+  ../${_realname}-svn/configure \
+    CPPLAGS="-D__USE_MINGW_ANSI_STDIO=1" \
+    --prefix=${MINGW_PREFIX} \
+    --build=${MINGW_CHOST} \
+    --includedir=${MINGW_PREFIX}/include/sdcc \
+    --libdir=${MINGW_PREFIX}/lib/sdcc \
+    --disable-pic14-port \
+    --disable-pic16-port \
+    --disable-werror
+
+  export PATH="${srcdir}/build-${CARCH}/bin:$PATH"
+
+  make --jobs=1
+}
+
+check() {
+  cd "${srcdir}"/build-${CARCH}/support/regression
+  make -k --jobs=1 all || true
+}
+
+package() {
+  cd "${srcdir}"/build-${CARCH}
+
+  make install DESTDIR="$pkgdir"
+
+#  # Delete build folder to save space needed when doing check builds
+#  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+}
