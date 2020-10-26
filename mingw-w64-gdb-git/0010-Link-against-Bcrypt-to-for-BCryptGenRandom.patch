@@ -1,0 +1,71 @@
+From c329effb04fd26d1bc5ac3ba3123cbf1a1cd1743 Mon Sep 17 00:00:00 2001
+From: Liu Hao <lh_mouse@126.com>
+Date: Mon, 26 Oct 2020 21:41:53 +0800
+Subject: [PATCH] Link against Bcrypt to for `BCryptGenRandom()`
+
+Signed-off-by: Liu Hao <lh_mouse@126.com>
+---
+ gdb/Makefile.in      | 4 ++--
+ gdb/configure        | 2 +-
+ gdbsupport/common.m4 | 2 +-
+ gdbsupport/configure | 2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index 4808357e651..e971116c8a0 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -626,9 +626,9 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
+ 	$(XM_CLIBS) $(GDBTKLIBS) \
+ 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
+ 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
+-	$(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
++	$(LIBGNU) $(LIBICONV) \
+ 	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
+-	$(DEBUGINFOD_LIBS)
++	$(DEBUGINFOD_LIBS) $(WIN32LIBS)
+ CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
+ 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
+ 	$(LIBSUPPORT)
+diff --git a/gdb/configure b/gdb/configure
+index 2ab9057127c..1524d5496aa 100755
+--- a/gdb/configure
++++ b/gdb/configure
+@@ -12998,7 +12998,7 @@ fi
+ 
+ $as_echo "#define USE_WIN32API 1" >>confdefs.h
+ 
+-      WIN32APILIBS="-lws2_32"
++      WIN32APILIBS="-lws2_32 -lbcrypt"
+       ;;
+   esac
+ 
+diff --git a/gdbsupport/common.m4 b/gdbsupport/common.m4
+index e8fd64c7a8e..34b22575693 100644
+--- a/gdbsupport/common.m4
++++ b/gdbsupport/common.m4
+@@ -32,7 +32,7 @@ AC_DEFUN([GDB_AC_COMMON], [
+ 		 POSIX API.  On Windows, we use the Windows API when
+ 		 building for MinGW, but the POSIX API when building
+ 		 for Cygwin.])
+-      WIN32APILIBS="-lws2_32"
++      WIN32APILIBS="-lws2_32 -lbcrypt"
+       ;;
+   esac
+ 
+diff --git a/gdbsupport/configure b/gdbsupport/configure
+index bd95b6d7f49..68400319193 100755
+--- a/gdbsupport/configure
++++ b/gdbsupport/configure
+@@ -8407,7 +8407,7 @@ fi
+ 
+ $as_echo "#define USE_WIN32API 1" >>confdefs.h
+ 
+-      WIN32APILIBS="-lws2_32"
++      WIN32APILIBS="-lws2_32 -lbcrypt"
+       ;;
+   esac
+ 
+-- 
+2.29.1
+

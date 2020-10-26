@@ -3,10 +3,10 @@
 # Contributor: Liu Hao <lh_mouse@126.com>
 
 _realname=gdb
-_branch=gdb-9-branch
+_branch=gdb-10-branch
 _gcc_ver=$(gcc -v 2>&1 | grep "^gcc version" | head -n1 | cut -c 13- | sed -r "s/\\s.*$//")
 pkgbase=mingw-w64-${_realname}-git
-pkgver=r99664.c923e8230e
+pkgver=r103287.5ef68f86d44
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
 replaces=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}=${pkgver}")
@@ -27,7 +27,7 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-iconv"
              "${MINGW_PACKAGE_PREFIX}-ncurses"
              "${MINGW_PACKAGE_PREFIX}-xz"
              "git")
-options=('staticlibs' '!distcc' '!ccache' 'debug' '!strip')
+options=('staticlibs' '!distcc' '!ccache') # 'debug' '!strip'
 source=("${_realname}"::"git://sourceware.org/git/binutils-gdb.git#branch=${_branch}"
         gdbinit
         0001-MinGW-w64-Two-fixes-for-unusual-files.patch
@@ -35,15 +35,17 @@ source=("${_realname}"::"git://sourceware.org/git/binutils-gdb.git#branch=${_bra
         0003-MinGW-w64-Use-gnu-printf.patch
         0004-GDB-performance.patch
         0006-Disable-checks-using-setenv-or-unsetenv-as-they-do-n.patch
-        0009-Backport-patches-from-mingw-w64-gdb.patch)
+        0009-Backport-patches-from-mingw-w64-gdb.patch
+        0010-Link-against-Bcrypt-to-for-BCryptGenRandom.patch)
 sha256sums=('SKIP'
             'dea2bbad4967280910559c6a11b865aeec19cab34647fb5894cb498b24b14462'
             '9f02f6740fc5a8e0900e2ec0196bb5851f5a5f06a4da162434646dff7fef4e54'
             'c92183a52f53d82cb5ffddf2a18f5bddd350ccc0db01eff1e5918d98467ee8e3'
-            'dfe7325957b9ef9de661dab754bf97826093761be6eb41fe766a6b6490d7b254'
+            '912bfbd61c0d2f88c0d12c958eba7c4eefcfee1fc10dd99f0dea0ac52cf25adc'
             '238e6099343854ef664bbf10a4109873d6a52a0d2f0515899db4821f1734a23e'
             '4b21429e3583866b25ca4feb6ae57daab81d8735d1eb52ab61338184f58bc2fb'
-            '6b4c3360a53c15378bdebdfb380678b6b8ba99ac93ef6b8a1083952458e84bea')
+            '6b4c3360a53c15378bdebdfb380678b6b8ba99ac93ef6b8a1083952458e84bea'
+            'd3aea9d1d717c80e4b7c2e67bd94a298dfdb8f84f3aaefce35728e06bbbe9206')
 
 pkgver() {
   cd "$srcdir/$_realname"
@@ -58,6 +60,7 @@ prepare() {
   git am "${srcdir}"/0004-GDB-performance.patch
   git am "${srcdir}"/0006-Disable-checks-using-setenv-or-unsetenv-as-they-do-n.patch
   git am "${srcdir}"/0009-Backport-patches-from-mingw-w64-gdb.patch
+  git am "${srcdir}"/0010-Link-against-Bcrypt-to-for-BCryptGenRandom.patch
 }
 
 build() {
