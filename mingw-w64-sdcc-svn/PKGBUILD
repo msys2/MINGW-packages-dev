@@ -67,10 +67,11 @@ prepare() {
 
   cd "$srcdir/${_realname}-svn"
 
+#    002-MSys2-MinGW-GCC-Warning-reduction.patch \
+
   apply_patch_with_msg \
     001-ucsim-comment-out-vsnprintf-prototype.patch \
     903-Bug-23142-SIGSEGV-in-is_strip_section.patch \
-    002-MSys2-MinGW-GCC-Warning-reduction.patch \
     003-MSys2-sdbinutils-add-USE_MINGW_ANSI_STDIO-guard.patch
 }
 
