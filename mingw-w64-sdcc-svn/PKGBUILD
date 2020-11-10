@@ -5,7 +5,7 @@
 _realname=sdcc
 pkgbase=mingw-w64-${_realname}-svn
 pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}-svn
-pkgver=4.0.4.r11943
+pkgver=4.0.4.r11951
 pkgrel=1
 pkgdesc="Retargettable ANSI C compiler [Intel 8051, Maxim 80DS390, Zilog Z80 and the Motorola 68HC08] (mingw-w64)"
 arch=('any')
