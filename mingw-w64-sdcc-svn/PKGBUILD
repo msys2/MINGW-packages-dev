@@ -132,6 +132,6 @@ package() {
 
   make install DESTDIR="$pkgdir"
 
-#  # Delete build folder to save space needed when doing check builds
-#  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+  # Delete build folder to save space needed when doing check builds
+  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
 }
