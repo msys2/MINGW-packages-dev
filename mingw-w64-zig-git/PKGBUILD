@@ -25,6 +25,7 @@ build() {
         -DCMAKE_CXX_COMPILER="clang++" \
         -DCMAKE_C_COMPILER="clang" \
         -DZIG_PREFER_CLANG_CPP_DYLIB=true \
+        -DZIG_STATIC=off \
         -DZIG_TARGET_TRIPLE="x86_64-windows-gnu" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_PREFIX_PATH=${MINGW_PREFIX} \
