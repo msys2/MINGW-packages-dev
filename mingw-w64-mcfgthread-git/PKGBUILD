@@ -8,6 +8,7 @@ pkgver=r521.9570e5c
 pkgrel=1
 pkgdesc="An efficient Gthread implementation for GCC MinGW-w64 targets on Windows, providing both C11 and C++11 thread support"
 arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64')
 url="https://github.com/lhmouse/mcfgthread"
 license=('LGPL' 'custom')
 options=('staticlibs' 'strip')
@@ -91,5 +92,13 @@ package_mingw-w64-x86_64-mcfgthread-git() {
   package_mingw-w64-mcfgthread
 }
 package_mingw-w64-x86_64-mcfgthread-libs-git() {
+  package_mingw-w64-mcfgthread-libs
+}
+
+# UCRT 64-bit wrappers
+package_mingw-w64-ucrt-x86_64-mcfgthread-git() {
+  package_mingw-w64-mcfgthread
+}
+package_mingw-w64-ucrt-x86_64-mcfgthread-libs-git() {
   package_mingw-w64-mcfgthread-libs
 }
