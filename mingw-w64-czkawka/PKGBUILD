@@ -1,0 +1,48 @@
+# Maintainer:  Tim Stahlhut <stahta01@gmail.com>
+
+_realname=czkawka
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=3.1.0
+pkgrel=1
+pkgdesc='Simple, fast and free app to remove unnecessary files from your computer (mingw-w64)'
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64')
+url="https://qarmin.github.io/czkawka/"
+license=('MIT' 'Various')
+depends=("${MINGW_PACKAGE_PREFIX}-gtk3")
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust")
+source=("https://github.com/qarmin/czkawka/archive/refs/tags/${pkgver}.tar.gz")
+sha256sums=('296642c2c0ed5bb930290aafce59e493c7318565b4a39d521b2ec9e2f1bfe52a')
+
+_build_suffix="${MINGW_PACKAGE_PREFIX/mingw-w64-}"
+
+prepare() {
+  cd ${_realname}-${pkgver}
+  ${MINGW_PREFIX}/bin/cargo fetch --locked
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${_build_suffix} ]] && rm -rf "${srcdir}"/build-${_build_suffix}
+  cd ${_realname}-${pkgver}
+  ${MINGW_PREFIX}/bin/cargo build \
+    --release \
+    --frozen \
+    --target-dir "${srcdir}"/build-${_build_suffix}
+}
+
+# https://doc.rust-lang.org/cargo/commands/cargo-test.html
+#check() {
+#  cd ${_realname}-${pkgver}
+#  ${MINGW_PREFIX}/bin/cargo test \
+#    --release \
+#    --frozen \
+#    --target-dir "${srcdir}"/build-${_build_suffix}
+#}
+
+package() {
+  install -Dm 755 "${srcdir}"/build-${_build_suffix}/release/czkawka_gui.exe -t "${pkgdir}/${MINGW_PREFIX}/bin"
+  install -Dm 755 "${srcdir}"/build-${_build_suffix}/release/czkawka_cli.exe -t "${pkgdir}/${MINGW_PREFIX}/bin"
+
+  install -Dm644 ${_realname}-${pkgver}/LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+}
