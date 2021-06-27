@@ -1,0 +1,30 @@
+From 1cce1d11fcf9f651bc3368a187ad1b637ccc53d3 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Sat, 12 Dec 2020 15:29:02 -0500
+Subject: msys add ExcHndlInit
+
+---
+ src/main-application.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/main-application.c b/src/main-application.c
+index ae8beaccd..5ddb52585 100644
+--- a/src/main-application.c
++++ b/src/main-application.c
+@@ -16,6 +16,7 @@
+ #ifdef G_OS_WIN32
+ #define _WIN32_WINNT 0x0501
+ #include <windows.h>
++#include <exchndl.h>         /* crash/exception handler */
+ #include <io.h>
+ #endif
+ 
+@@ -229,6 +230,7 @@ main (int argc, char const **argv)
+ 			}
+ 		}
+ 	}
++	ExcHndlInit();
+ #endif
+ 
+ 	gnumeric_arg_parse (argc, (char **)argv);
+-- 

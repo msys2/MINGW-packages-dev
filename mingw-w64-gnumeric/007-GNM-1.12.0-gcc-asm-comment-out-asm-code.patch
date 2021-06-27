@@ -1,0 +1,26 @@
+From 28e684e5a3e76c82023920037218983869ac2103 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Thu, 10 Dec 2020 04:18:41 -0500
+Subject: gcc asm comment out asm code
+
+---
+ plugins/excelplugins/xlcall32_emulation.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/plugins/excelplugins/xlcall32_emulation.c b/plugins/excelplugins/xlcall32_emulation.c
+index ede716d8f..1415d9cf3 100644
+--- a/plugins/excelplugins/xlcall32_emulation.c
++++ b/plugins/excelplugins/xlcall32_emulation.c
+@@ -82,7 +82,9 @@ int far pascal XLCallVer(void){
+ 	return 1280;
+ }
+ 
++/*
+ #ifdef WIN32
+ asm (".section .drectve");
+ asm (".ascii \"-export:Excel4v=Excel4v@16,XLCallVer=XLCallVer@0\"");
+ #endif
++*/
+-- 
+2.29.2.windows.2
+
