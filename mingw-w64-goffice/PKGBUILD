@@ -6,6 +6,8 @@ pkgbase=mingw-w64-${_realname}
 pkgname=(
   "${MINGW_PACKAGE_PREFIX}-${_realname}-git"
 )
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 pkgver=0.10.49.0
 pkgrel=1
 pkgdesc="A GLib/GTK+ set of document-centric objects and utilities (mingw-w64)"
