@@ -1,0 +1,21 @@
+From 3414bbc15d3b1cb31f33272c9c0be00000232875 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Wed, 26 Aug 2020 04:23:47 -0400
+Subject: Comment out vsnprintf prototype
+
+---
+
+diff --git a/sdcc/sim/ucsim/cmd.src/cmdutil.cc b/sdcc/sim/ucsim/cmd.src/cmdutil.cc
+index 697b4dd45..de72ddbaa 100644
+--- a/sdcc/sim/ucsim/cmd.src/cmdutil.cc
++++ b/sdcc/sim/ucsim/cmd.src/cmdutil.cc
+@@ -107,7 +107,7 @@ proc_escape(char *string, int *len)
+ 
+ 
+ extern "C" int vasprintf(char **strp, const  char *format, va_list ap);
+-extern "C" int vsnprintf(char *str, size_t size,const char *format,va_list ap);
++/* extern "C" int vsnprintf(char *str, size_t size,const char *format,va_list ap); */
+ 
+ int
+ cmd_vfprintf(FILE *f, char *format, va_list ap)
+--
