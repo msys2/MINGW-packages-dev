@@ -9,58 +9,68 @@ pkgver=r8085.243d9cf1d
 pkgrel=1
 pkgdesc="The programmers solid 3D CAD modeller (mingw-w64)"
 arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64')
 license=("GPL2")
 url="https://openscad.org/"
-depends=("${MINGW_PACKAGE_PREFIX}-qt5"
+depends=("${MINGW_PACKAGE_PREFIX}-qt5-base"
+         "${MINGW_PACKAGE_PREFIX}-qt5-svg"
+         "${MINGW_PACKAGE_PREFIX}-qt5-multimedia"
          "${MINGW_PACKAGE_PREFIX}-boost"
          "${MINGW_PACKAGE_PREFIX}-cgal"
-         "${MINGW_PACKAGE_PREFIX}-opencsg"
-         "${MINGW_PACKAGE_PREFIX}-glew"
-         "${MINGW_PACKAGE_PREFIX}-qscintilla"
-         "${MINGW_PACKAGE_PREFIX}-shared-mime-info"
          "${MINGW_PACKAGE_PREFIX}-double-conversion"
+         "${MINGW_PACKAGE_PREFIX}-fontconfig"
+         "${MINGW_PACKAGE_PREFIX}-freetype"
+         "${MINGW_PACKAGE_PREFIX}-cairo"
+         "${MINGW_PACKAGE_PREFIX}-glew"
+         "${MINGW_PACKAGE_PREFIX}-glib2"
+         "${MINGW_PACKAGE_PREFIX}-harfbuzz"
+         "${MINGW_PACKAGE_PREFIX}-libxml2"
          "${MINGW_PACKAGE_PREFIX}-libzip"
-         "${MINGW_PACKAGE_PREFIX}-lib3mf")
-makedepends=("${MINGW_PACKAGE_PREFIX}-gcc"
+         "${MINGW_PACKAGE_PREFIX}-opencsg"
+         "${MINGW_PACKAGE_PREFIX}-lib3mf"
+         "${MINGW_PACKAGE_PREFIX}-qscintilla"
+         "${MINGW_PACKAGE_PREFIX}-shared-mime-info")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-gcc"
              "${MINGW_PACKAGE_PREFIX}-eigen3"
-             "${MINGW_PACKAGE_PREFIX}-gdb"
-             "${MINGW_PACKAGE_PREFIX}-imagemagick"
-             "${MINGW_PACKAGE_PREFIX}-pkg-config"
-             "${MINGW_PACKAGE_PREFIX}-lib3mf-devel"
-             "bison"
-             "make"
-             "git")
-options=(!strip staticlibs !buildflags)
-source=("${_realname}"::"git+https://github.com/openscad/openscad.git")
-sha256sums=('SKIP')
+             "${MINGW_PACKAGE_PREFIX}-imagemagick")
+options=(!strip staticlibs)
+source=("${_realname}"::"git+https://github.com/openscad/openscad.git"
+        '001-openscad-2021-libintl-collisions.patch')
+sha256sums=('SKIP'
+            'f295d41896cc55f6645e080e527ba3d033357bc744b7f7bb01b9271974ee930e')
 
 pkgver() {
-  cd "$srcdir/$_realname"
+  cd "${srcdir}/${_realname}"
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 prepare() {
   cd "${srcdir}/${_realname}"
-  rm -f libraries/MCAD/*.py
+
+  patch -p1 -i "${srcdir}/001-openscad-2021-libintl-collisions.patch"
+
+  git submodule update --init --recursive
 }
 
 build() {
-  cd ${srcdir}/${_realname}
-  BOOSTDIR=${MINGW_PREFIX} \
-  CGALDIR=${MINGW_PREFIX} \
-  EIGENDIR=${MINGW_PREFIX} \
-  GLEWDIR=${MINGW_PREFIX} \
-  OPENCSGDIR=${MINGW_PREFIX} \
-  LIB3MF_INCLUDEPATH=${MINGW_PREFIX}/include \
-  LIB3MF_LIBPATH=${MINGW_PREFIX}/lib \
-  ${MINGW_PREFIX}/bin/qmake CONFIG+=release PREFIX="${pkgdirbase}/${pkgname}${MINGW_PREFIX}"
+  [[ -d "${srcdir}/build-${MSYSTEM}" ]] && rm -r "${srcdir}/build-${MSYSTEM}"
+  mkdir -p "${srcdir}/build-${MSYSTEM}" && cd "${srcdir}/build-${MSYSTEM}"
 
-  make -j1
-  convert "icons/${_realname}.png" -resize 128x128\> "icons/${_realname}-128.png"
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+  ${MINGW_PREFIX}/bin/cmake.exe \
+    -G"MSYS Makefiles" \
+    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DEXPERIMENTAL=ON \
+    -DSNAPSHOT=ON \
+    -DCMAKE_CXX_FLAGS=-I${MINGW_PREFIX}/include/Bindings/Cpp \
+    ../${_realname}
 }
 
 package() {
-  cd ${srcdir}/${_realname}
-  make INSTALL_ROOT= install
-  install -Dm644 "icons/${_realname}.xml" "${pkgdir}${MINGW_PREFIX}/share/mime/packages/${_realname}.xml"
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  DESTDIR=${pkgdir} ${MINGW_PREFIX}/bin/cmake.exe --build . --target install
+  install -Dm644 "${srcdir}/${_realname}/COPYING" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING"
 }
