@@ -61,7 +61,7 @@ build() {
     -DCMAKE_BUILD_TYPE=Release \
     -DEXPERIMENTAL=ON \
     -DSNAPSHOT=ON \
-    -DCMAKE_CXX_FLAGS=-I${MINGW_PREFIX}/include/Bindings/Cpp \
+    -DLIB3MF_INCLUDE_DIRS=${MINGW_PREFIX}/include/Bindings/Cpp \
     ../${_realname}
 }
 
