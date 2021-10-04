@@ -63,11 +63,13 @@ build() {
     -DSNAPSHOT=ON \
     -DLIB3MF_INCLUDE_DIRS=${MINGW_PREFIX}/include/Bindings/Cpp \
     ../${_realname}
+
+  cmake --build .
 }
 
 package() {
   cd "${srcdir}/build-${MSYSTEM}"
 
-  DESTDIR=${pkgdir} ${MINGW_PREFIX}/bin/cmake.exe --build . --target install
+  DESTDIR=${pkgdir} cmake --install .
   install -Dm644 "${srcdir}/${_realname}/COPYING" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING"
 }
