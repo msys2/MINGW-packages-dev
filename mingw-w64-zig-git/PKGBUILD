@@ -2,7 +2,7 @@
 
 pkgbase=mingw-w64-zig-git
 pkgname="${MINGW_PACKAGE_PREFIX}-zig-git"
-pkgver=0.8.0.dev.1573.501b4aff9
+pkgver=0.9.0.dev
 pkgrel=1
 provides=("${MINGW_PACKAGE_PREFIX}-zig")
 pkgdesc='Zig is a general-purpose programming language and toolchain for maintaining robust, optimal, and reusable software. (mingw-w64)'
@@ -11,25 +11,27 @@ mingw_arch=('mingw64' 'ucrt64')
 url='https://ziglang.org'
 license=(MIT)
 depends=("${MINGW_PACKAGE_PREFIX}-llvm"
-        "${MINGW_PACKAGE_PREFIX}-clang")
+        "${MINGW_PACKAGE_PREFIX}-zlib")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
-             "${MINGW_PACKAGE_PREFIX}-lld")
+             "${MINGW_PACKAGE_PREFIX}-lld"
+             "${MINGW_PACKAGE_PREFIX}-clang"
+             )
 source=(zig::git+https://github.com/ziglang/zig.git)
 sha512sums=('SKIP')
 
 build() {
   cd ${srcdir}/zig
-        MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+      MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         ${MINGW_PREFIX}/bin/cmake \
         -G"MSYS Makefiles" \
         -DCMAKE_CXX_COMPILER="clang++" \
         -DCMAKE_C_COMPILER="clang" \
-        -DZIG_PREFER_CLANG_CPP_DYLIB=true \
-        -DZIG_STATIC=off \
-        -DZIG_TARGET_TRIPLE="x86_64-windows-gnu" \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_PREFIX_PATH=${MINGW_PREFIX} \
+        -DZIG_PREFER_CLANG_CPP_DYLIB=false \
+        -DZIG_TARGET_TRIPLE="x86_64-windows-gnu" \
+        -DZIG_TARGET_MCPU="baseline" \
         -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+        -DZIG_USE_LLVM_CONFIG=ON \
         -B build-${MINGW_CHOST}
 
   cmake --build build-${MINGW_CHOST} --config release --parallel
