@@ -19,8 +19,10 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
              "git"
              )
 _commit="fdd11f6cee7ef14253cef53729e09d9415b4be7e"
-source=("zig::git+https://github.com/ziglang/zig.git#commit=$_commit")
-sha512sums=('SKIP')
+source=("zig::git+https://github.com/ziglang/zig.git#commit=$_commit"
+        "0001-remove-disabled-targets.patch")
+sha512sums=('SKIP'
+            'SKIP')
 
 pkgver() {
   cd "${srcdir}/zig"
@@ -38,6 +40,7 @@ apply_patch_git() {
 
 prepare() {
   cd "${srcdir}/zig"
+  apply_patch_git 0001-remove-disabled-targets.patch
 }
 
 build() {
