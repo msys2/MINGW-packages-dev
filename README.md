@@ -5,7 +5,7 @@ This repository contains package scripts for MinGW-w64 targets to build under MS
 
 ## Documentation
 
-See the [MSYS2 website](https://www.msys2.org/wiki/Home).
+See the [MSYS2 website](https://www.msys2.org/).
 
 ## Using packages
 
