@@ -2,7 +2,7 @@
 
 pkgbase=mingw-w64-zig-git
 pkgname="${MINGW_PACKAGE_PREFIX}-zig-git"
-pkgver=0.9.0.dev
+pkgver=0.9.0dev.1393+fdd11f6ce
 pkgrel=1
 provides=("${MINGW_PACKAGE_PREFIX}-zig")
 pkgdesc='Zig is a general-purpose programming language and toolchain for maintaining robust, optimal, and reusable software. (mingw-w64)'
@@ -15,24 +15,45 @@ depends=("${MINGW_PACKAGE_PREFIX}-llvm"
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-lld"
              "${MINGW_PACKAGE_PREFIX}-clang"
+             "gawk"
+             "git"
              )
-source=(zig::git+https://github.com/ziglang/zig.git)
+_commit="fdd11f6cee7ef14253cef53729e09d9415b4be7e"
+source=("zig::git+https://github.com/ziglang/zig.git#commit=$_commit")
 sha512sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/zig"
+  local _zigver=$(gawk 'match($0, /^set\(ZIG_VERSION_MAJOR ([0-9]+)\)/, a) { MAJ=a[1] } match($0, /set\(ZIG_VERSION_MINOR ([0-9]+)\)/, a) { MIN=a[1] } match($0, /set\(ZIG_VERSION_PATCH ([0-9]+)\)/, a) { PAT=a[1] } END { printf("%s.%s.%s", MAJ, MIN, PAT) }' CMakeLists.txt)
+  local _gitdesc=$(git describe --match '*.*.*' --tags $_commit)
+  printf "%sdev.%s+%s" ${_zigver} $(cut -d- -f2 <<<"${_gitdesc}") $(cut -d- -f3 <<<"${_gitdesc}" | cut -dg -f2-)
+}
+
+apply_patch_git() {
+  for _patch in "$@"
+  do
+    git am --committer-date-is-author-date "${srcdir}/${_patch}"
+  done
+}
+
+prepare() {
+  cd "${srcdir}/zig"
+}
 
 build() {
   cd ${srcdir}/zig
-      MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
-        ${MINGW_PREFIX}/bin/cmake \
-        -G"MSYS Makefiles" \
-        -DCMAKE_CXX_COMPILER="clang++" \
-        -DCMAKE_C_COMPILER="clang" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DZIG_PREFER_CLANG_CPP_DYLIB=false \
-        -DZIG_TARGET_TRIPLE="x86_64-windows-gnu" \
-        -DZIG_TARGET_MCPU="baseline" \
-        -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-        -DZIG_USE_LLVM_CONFIG=ON \
-        -B build-${MINGW_CHOST}
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+  ${MINGW_PREFIX}/bin/cmake \
+    -G"MSYS Makefiles" \
+    -DCMAKE_CXX_COMPILER="clang++" \
+    -DCMAKE_C_COMPILER="clang" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DZIG_PREFER_CLANG_CPP_DYLIB=false \
+    -DZIG_TARGET_TRIPLE="x86_64-windows-gnu" \
+    -DZIG_TARGET_MCPU="baseline" \
+    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    -DZIG_USE_LLVM_CONFIG=ON \
+    -B build-${MINGW_CHOST}
 
   cmake --build build-${MINGW_CHOST} --config release --parallel
 }
