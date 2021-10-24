@@ -6,7 +6,7 @@ pkgbase=mingw-w64-${_realname}-git
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=r9665.1acb8b2c8
+pkgver=r9701.5532563a6
 pkgrel=1
 pkgdesc="The programmers solid 3D CAD modeller (mingw-w64)"
 arch=('any')
@@ -32,7 +32,7 @@ depends=("${MINGW_PACKAGE_PREFIX}-qt5-base"
          "${MINGW_PACKAGE_PREFIX}-qscintilla"
          "${MINGW_PACKAGE_PREFIX}-shared-mime-info")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
-             "${MINGW_PACKAGE_PREFIX}-gcc"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
              "${MINGW_PACKAGE_PREFIX}-eigen3"
              "${MINGW_PACKAGE_PREFIX}-imagemagick")
 options=(!strip staticlibs)
@@ -56,7 +56,7 @@ build() {
 
   MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
   ${MINGW_PREFIX}/bin/cmake.exe \
-    -G"MSYS Makefiles" \
+    -G"Ninja" \
     -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
     -DCMAKE_BUILD_TYPE=Release \
     -DEXPERIMENTAL=ON \
