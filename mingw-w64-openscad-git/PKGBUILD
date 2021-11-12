@@ -6,7 +6,7 @@ pkgbase=mingw-w64-${_realname}-git
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-pkgver=r9701.5532563a6
+pkgver=r9750.7ea0225de
 pkgrel=1
 pkgdesc="The programmers solid 3D CAD modeller (mingw-w64)"
 arch=('any')
@@ -17,7 +17,6 @@ depends=("${MINGW_PACKAGE_PREFIX}-qt5-base"
          "${MINGW_PACKAGE_PREFIX}-qt5-svg"
          "${MINGW_PACKAGE_PREFIX}-qt5-multimedia"
          "${MINGW_PACKAGE_PREFIX}-boost"
-         "${MINGW_PACKAGE_PREFIX}-cgal"
          "${MINGW_PACKAGE_PREFIX}-double-conversion"
          "${MINGW_PACKAGE_PREFIX}-fontconfig"
          "${MINGW_PACKAGE_PREFIX}-freetype"
@@ -33,6 +32,7 @@ depends=("${MINGW_PACKAGE_PREFIX}-qt5-base"
          "${MINGW_PACKAGE_PREFIX}-shared-mime-info")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-cgal"
              "${MINGW_PACKAGE_PREFIX}-eigen3"
              "${MINGW_PACKAGE_PREFIX}-imagemagick")
 options=(!strip staticlibs)
