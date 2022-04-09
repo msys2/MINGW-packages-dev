@@ -4,15 +4,17 @@ _realname=mcfgthread
 pkgbase=mingw-w64-${_realname}-git
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git"
          "${MINGW_PACKAGE_PREFIX}-${_realname}"-libs-git)
-pkgver=r521.9570e5c
+pkgver=r156.31ceba8
 pkgrel=1
 pkgdesc="An efficient Gthread implementation for GCC MinGW-w64 targets on Windows, providing both C11 and C++11 thread support"
 arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64')
 url="https://github.com/lhmouse/mcfgthread"
 license=('LGPL' 'custom')
 options=('staticlibs' 'strip')
 _branch=master
-makedepends=("${MINGW_PACKAGE_PREFIX}-gcc"
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-autotools"
              "${MINGW_PACKAGE_PREFIX}-crt"
              "${MINGW_PACKAGE_PREFIX}-headers")
 source=("git+https://github.com/lhmouse/mcfgthread.git")
@@ -52,10 +54,9 @@ check() {
 }
 
 package_mingw-w64-mcfgthread() {
-  pkgdesc="An efficient Gthread implementation for GCC MinGW-w64 targets on Windows, providing both C11 and C++11 thread support (devel)"
+  pkgdesc="An efficient gthread implementation, providing both C++11 threading support (devel)"
   depends=("${MINGW_PACKAGE_PREFIX}-${_realname}"-libs)
   provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-  conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 
   mkdir -p "${pkgdir}${MINGW_PREFIX}"
   cd "${srcdir}${MINGW_PREFIX}"
@@ -64,11 +65,10 @@ package_mingw-w64-mcfgthread() {
   cp --parents -r include   --target-directory="${pkgdir}${MINGW_PREFIX}"
   cp --parents -r lib       --target-directory="${pkgdir}${MINGW_PREFIX}"
 }
+
 package_mingw-w64-mcfgthread-libs() {
-  pkgdesc="An efficient Gthread implementation for GCC MinGW-w64 targets on Windows, providing both C11 and C++11 thread support (libs)"
-  depends=()
+  pkgdesc="An efficient gthread implementation, providing both C++11 threading support (libs)"
   provides=("${MINGW_PACKAGE_PREFIX}-${_realname}"-libs)
-  conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}"-libs)
 
   mkdir -p "${pkgdir}${MINGW_PREFIX}"
   cd "${srcdir}${MINGW_PREFIX}"
@@ -82,6 +82,7 @@ package_mingw-w64-mcfgthread-libs() {
 package_mingw-w64-i686-mcfgthread-git() {
   package_mingw-w64-mcfgthread
 }
+
 package_mingw-w64-i686-mcfgthread-libs-git() {
   package_mingw-w64-mcfgthread-libs
 }
@@ -90,6 +91,16 @@ package_mingw-w64-i686-mcfgthread-libs-git() {
 package_mingw-w64-x86_64-mcfgthread-git() {
   package_mingw-w64-mcfgthread
 }
+
 package_mingw-w64-x86_64-mcfgthread-libs-git() {
+  package_mingw-w64-mcfgthread-libs
+}
+
+# UCRT 64-bit wrappers
+package_mingw-w64-ucrt-x86_64-mcfgthread-git() {
+  package_mingw-w64-mcfgthread
+}
+
+package_mingw-w64-ucrt-x86_64-mcfgthread-libs-git() {
   package_mingw-w64-mcfgthread-libs
 }
