@@ -1,4 +1,4 @@
-From 5bc0c8c132c829413452f03027bb89e0ac09072c Mon Sep 17 00:00:00 2001
+From 643f34ab9e7d95fead48b7eb9e66ca093027e5ca Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 31 Oct 2015 21:39:35 +0000
 Subject: [PATCH] MinGW-w64: Two fixes for 'unusual' files.
@@ -12,10 +12,10 @@ Pretend 'nul' is '/dev/null' which is necessary for libtool.
  3 files changed, 46 insertions(+), 4 deletions(-)
 
 diff --git a/binutils/bucomm.c b/binutils/bucomm.c
-index 5a0b634344..ce35712889 100644
+index 8ce66ab8cce..72df1e66986 100644
 --- a/binutils/bucomm.c
 +++ b/binutils/bucomm.c
-@@ -586,10 +586,19 @@ off_t
+@@ -597,10 +597,19 @@ off_t
  get_file_size (const char * file_name)
  {
    struct stat statbuf;
@@ -35,7 +35,7 @@ index 5a0b634344..ce35712889 100644
    if (stat (file_name, &statbuf) < 0)
      {
        if (errno == ENOENT)
-@@ -600,8 +609,15 @@ get_file_size (const char * file_name)
+@@ -611,8 +620,15 @@ get_file_size (const char * file_name)
      }
    else if (S_ISDIR (statbuf.st_mode))
      non_fatal (_("Warning: '%s' is a directory"), file_name);
@@ -54,10 +54,10 @@ index 5a0b634344..ce35712889 100644
      non_fatal (_("Warning: '%s' has negative size, probably it is too large"),
                 file_name);
 diff --git a/binutils/elfedit.c b/binutils/elfedit.c
-index 0c84028a29..66a9cd23ad 100644
+index e33c340d758..829cc04f46d 100644
 --- a/binutils/elfedit.c
 +++ b/binutils/elfedit.c
-@@ -483,6 +483,14 @@ static int
+@@ -707,6 +707,14 @@ static int
  check_file (const char *file_name, struct stat *statbuf_p)
  {
    struct stat statbuf;
@@ -72,9 +72,9 @@ index 0c84028a29..66a9cd23ad 100644
  
    if (statbuf_p == NULL)
      statbuf_p = &statbuf;
-@@ -497,8 +505,13 @@ check_file (const char *file_name, struct stat *statbuf_p)
-       return 1;
+@@ -735,8 +743,13 @@ check_file (const char *file_name, struct stat *statbuf_p)
      }
+ #endif
  
 -  if (! S_ISREG (statbuf_p->st_mode))
 +  if (! S_ISREG (statbuf_p->st_mode) || t > 0)
@@ -88,13 +88,13 @@ index 0c84028a29..66a9cd23ad 100644
        return 1;
      }
 diff --git a/binutils/readelf.c b/binutils/readelf.c
-index 90af7cc39c..c25c82bb33 100644
+index a6073f7ec80..8978d29870a 100644
 --- a/binutils/readelf.c
 +++ b/binutils/readelf.c
-@@ -18416,6 +18416,14 @@ process_file (char * file_name)
+@@ -21873,6 +21873,14 @@ process_file (char * file_name)
    struct stat statbuf;
    char armag[SARMAG];
-   bfd_boolean ret = TRUE;
+   bool ret = true;
 +  int f, t;
 +  t = -1;
 +  f = open (file_name, O_RDONLY | O_BINARY);
@@ -106,8 +106,8 @@ index 90af7cc39c..c25c82bb33 100644
  
    if (stat (file_name, &statbuf) < 0)
      {
-@@ -18427,8 +18435,13 @@ process_file (char * file_name)
-       return FALSE;
+@@ -21884,8 +21892,13 @@ process_file (char * file_name)
+       return false;
      }
  
 -  if (! S_ISREG (statbuf.st_mode))
@@ -119,8 +119,8 @@ index 90af7cc39c..c25c82bb33 100644
 +        file_name = "/dev/null";
 +#endif
        error (_("'%s' is not an ordinary file\n"), file_name);
-       return FALSE;
+       return false;
      }
 -- 
-2.13.0
+2.32.0
 

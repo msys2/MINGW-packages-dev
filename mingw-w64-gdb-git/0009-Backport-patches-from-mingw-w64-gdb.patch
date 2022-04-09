@@ -1,4 +1,4 @@
-From 4838b842a95357914b9e6c894768d3c18a84a49f Mon Sep 17 00:00:00 2001
+From 01d0a16ec8def7184d0c72253262861c2e10cfdd Mon Sep 17 00:00:00 2001
 From: Liu Hao <lh_mouse@126.com>
 Date: Sun, 21 Jul 2019 00:06:24 +0800
 Subject: [PATCH] Backport patches from mingw-w64-gdb.
@@ -8,11 +8,11 @@ Subject: [PATCH] Backport patches from mingw-w64-gdb.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gdb/configure b/gdb/configure
-index 324eb50944..9bea7ae63a 100755
+index 5d89635c043..f25b51e5e6e 100755
 --- a/gdb/configure
 +++ b/gdb/configure
-@@ -10488,7 +10488,7 @@ fi
-         as_fn_error $? "failure running python-config --ldflags" "$LINENO" 5
+@@ -11181,7 +11181,7 @@ fi
+ 	as_fn_error $? "failure running python-config --ldflags" "$LINENO" 5
        fi
      fi
 -    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
@@ -21,5 +21,5 @@ index 324eb50944..9bea7ae63a 100755
        have_python_config=failed
        if test "${with_python}" != auto; then
 -- 
-2.24.1
+2.32.0
 

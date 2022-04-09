@@ -1,4 +1,4 @@
-From 1715a66b8e14aa2c52a2d569d5b2a76fd5f0114a Mon Sep 17 00:00:00 2001
+From d82827c91fe190597b2772d8a56b3ad46cb13050 Mon Sep 17 00:00:00 2001
 From: Ray Donnelly <mingw.android@gmail.com>
 Date: Sat, 31 Oct 2015 21:40:15 +0000
 Subject: [PATCH] MinGW-w64: Use gnu-printf
@@ -7,17 +7,16 @@ Subject: [PATCH] MinGW-w64: Use gnu-printf
  bfd/bfd-in.h       | 2 +-
  bfd/bfd-in2.h      | 2 +-
  binutils/prdbg.c   | 2 +-
- gas/read.c         | 2 +-
  gold/configure     | 2 +-
  gold/configure.ac  | 2 +-
  include/ansidecl.h | 4 ++--
- 7 files changed, 8 insertions(+), 8 deletions(-)
+ 6 files changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/bfd/bfd-in.h b/bfd/bfd-in.h
-index 76b17bf7346..f0a5be08dba 100644
+index a4888f9f7f2..85540462b15 100644
 --- a/bfd/bfd-in.h
 +++ b/bfd/bfd-in.h
-@@ -158,7 +158,7 @@ typedef BFD_HOST_U_64_BIT symvalue;
+@@ -126,7 +126,7 @@ typedef BFD_HOST_U_64_BIT symvalue;
  
  #if BFD_HOST_64BIT_LONG
  #define BFD_VMA_FMT "l"
@@ -27,10 +26,10 @@ index 76b17bf7346..f0a5be08dba 100644
  #else
  #define BFD_VMA_FMT "ll"
 diff --git a/bfd/bfd-in2.h b/bfd/bfd-in2.h
-index 935ba535b54..b04cd11fa12 100644
+index 57b3c453649..95a895c787b 100644
 --- a/bfd/bfd-in2.h
 +++ b/bfd/bfd-in2.h
-@@ -165,7 +165,7 @@ typedef BFD_HOST_U_64_BIT symvalue;
+@@ -133,7 +133,7 @@ typedef BFD_HOST_U_64_BIT symvalue;
  
  #if BFD_HOST_64BIT_LONG
  #define BFD_VMA_FMT "l"
@@ -40,10 +39,10 @@ index 935ba535b54..b04cd11fa12 100644
  #else
  #define BFD_VMA_FMT "ll"
 diff --git a/binutils/prdbg.c b/binutils/prdbg.c
-index 1b376f485fe..8926a66361f 100644
+index 6c14dcac9a8..bedfffa022e 100644
 --- a/binutils/prdbg.c
 +++ b/binutils/prdbg.c
-@@ -504,7 +504,7 @@ print_vma (bfd_vma vma, char *buf, bfd_boolean unsignedp, bfd_boolean hexp)
+@@ -497,7 +497,7 @@ print_vma (bfd_vma vma, char *buf, bool unsignedp, bool hexp)
  #if BFD_HOST_64BIT_LONG_LONG
    else if (sizeof (vma) <= sizeof (unsigned long long))
      {
@@ -52,24 +51,11 @@ index 1b376f485fe..8926a66361f 100644
        if (hexp)
  	sprintf (buf, "0x%llx", (unsigned long long) vma);
        else if (unsignedp)
-diff --git a/gas/read.c b/gas/read.c
-index cd06ea51d92..7eb915b5d6f 100644
---- a/gas/read.c
-+++ b/gas/read.c
-@@ -4477,7 +4477,7 @@ emit_expr_with_reloc (expressionS *exp,
- 	{
- 	  /* Leading bits contain both 0s & 1s.  */
- #if defined (BFD64) && BFD_HOST_64BIT_LONG_LONG
--#ifndef __MSVCRT__
-+#if !defined(__MSVCRT__) || defined(__USE_MINGW_ANSI_STDIO)
- 	  as_warn (_("value 0x%llx truncated to 0x%llx"),
- 		   (unsigned long long) get, (unsigned long long) use);
- #else
 diff --git a/gold/configure b/gold/configure
-index 199a739e7d1..bf860046cc6 100755
+index b9f062b68eb..fde982191c5 100755
 --- a/gold/configure
 +++ b/gold/configure
-@@ -10087,7 +10087,7 @@ else
+@@ -10153,7 +10153,7 @@ else
  /* end confdefs.h.  */
  
  template<typename T> extern void foo(const char*, ...)
@@ -79,10 +65,10 @@ index 199a739e7d1..bf860046cc6 100755
  void bar() { foo<int>("%s\n", "foo"); }
  
 diff --git a/gold/configure.ac b/gold/configure.ac
-index eca4f01c111..60e8bd415ce 100644
+index 1716a779416..cae29866f38 100644
 --- a/gold/configure.ac
 +++ b/gold/configure.ac
-@@ -658,7 +658,7 @@ AC_CACHE_CHECK([whether we can use attributes with template functions],
+@@ -678,7 +678,7 @@ AC_CACHE_CHECK([whether we can use attributes with template functions],
  [gold_cv_template_attribute],
  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([
  template<typename T> extern void foo(const char*, ...)
@@ -92,7 +78,7 @@ index eca4f01c111..60e8bd415ce 100644
  void bar() { foo<int>("%s\n", "foo"); }
  ])], [gold_cv_template_attribute=yes], [gold_cv_template_attribute=no])])
 diff --git a/include/ansidecl.h b/include/ansidecl.h
-index ec7a13f016a..2cbc3b64d9e 100644
+index 0515228f325..7c2b9f18306 100644
 --- a/include/ansidecl.h
 +++ b/include/ansidecl.h
 @@ -195,7 +195,7 @@ So instead we use the macro below and test it against specific values.  */
@@ -114,5 +100,5 @@ index ec7a13f016a..2cbc3b64d9e 100644
  #  define ATTRIBUTE_NULL_PRINTF(m, n)
  # endif /* GNUC >= 3.3 */
 -- 
-2.29.1
+2.32.0
 

@@ -1,4 +1,4 @@
-From c329effb04fd26d1bc5ac3ba3123cbf1a1cd1743 Mon Sep 17 00:00:00 2001
+From c79fd63bdde94c333d51f60befd12ab04e46867b Mon Sep 17 00:00:00 2001
 From: Liu Hao <lh_mouse@126.com>
 Date: Mon, 26 Oct 2020 21:41:53 +0800
 Subject: [PATCH] Link against Bcrypt to for `BCryptGenRandom()`
@@ -12,26 +12,26 @@ Signed-off-by: Liu Hao <lh_mouse@126.com>
  4 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index 4808357e651..e971116c8a0 100644
+index 53beb3ab254..f95054b5f11 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
-@@ -626,9 +626,9 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
+@@ -638,9 +638,9 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
  	$(XM_CLIBS) $(GDBTKLIBS) \
  	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
  	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
--	$(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
-+	$(LIBGNU) $(LIBICONV) \
- 	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
+-	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
++	$(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
+ 	$(LIBMPFR) $(LIBGMP) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
 -	$(DEBUGINFOD_LIBS)
 +	$(DEBUGINFOD_LIBS) $(WIN32LIBS)
  CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
  	$(LIBSUPPORT)
 diff --git a/gdb/configure b/gdb/configure
-index 2ab9057127c..1524d5496aa 100755
+index f25b51e5e6e..2904da0a8fa 100755
 --- a/gdb/configure
 +++ b/gdb/configure
-@@ -12998,7 +12998,7 @@ fi
+@@ -13379,7 +13379,7 @@ fi
  
  $as_echo "#define USE_WIN32API 1" >>confdefs.h
  
@@ -41,7 +41,7 @@ index 2ab9057127c..1524d5496aa 100755
    esac
  
 diff --git a/gdbsupport/common.m4 b/gdbsupport/common.m4
-index e8fd64c7a8e..34b22575693 100644
+index 901c454ea8c..3a0ff7525ea 100644
 --- a/gdbsupport/common.m4
 +++ b/gdbsupport/common.m4
 @@ -32,7 +32,7 @@ AC_DEFUN([GDB_AC_COMMON], [
@@ -54,10 +54,10 @@ index e8fd64c7a8e..34b22575693 100644
    esac
  
 diff --git a/gdbsupport/configure b/gdbsupport/configure
-index bd95b6d7f49..68400319193 100755
+index a9dd02c5b72..7665fd04af5 100755
 --- a/gdbsupport/configure
 +++ b/gdbsupport/configure
-@@ -8407,7 +8407,7 @@ fi
+@@ -7685,7 +7685,7 @@ fi
  
  $as_echo "#define USE_WIN32API 1" >>confdefs.h
  
@@ -67,5 +67,5 @@ index bd95b6d7f49..68400319193 100755
    esac
  
 -- 
-2.29.1
+2.32.0
 
