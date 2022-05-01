@@ -1,0 +1,66 @@
+# Maintainer: Tim Stahlhut <stahta01@gmail.com>
+
+_realname=kicad
+pkgbase=mingw-w64-${_realname}-library-git
+pkgname=(
+  "${MINGW_PACKAGE_PREFIX}-${_realname}-footprints-git"
+  "${MINGW_PACKAGE_PREFIX}-${_realname}-symbols-git"
+  "${MINGW_PACKAGE_PREFIX}-${_realname}-templates-git"
+  "${MINGW_PACKAGE_PREFIX}-${_realname}-packages3D-git"
+)
+pkgver=6.0.4
+pkgrel=1
+pkgdesc="Software for the creation of electronic schematic diagrams and printed circuit board artwork (mingw-w64)"
+arch=(any)
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64')
+url="https://www.kicad.org/"
+license=("GPLv3+")
+groups=("${MINGW_PACKAGE_PREFIX}-eda")
+depends=()
+makedepends=(
+  "git"
+  "${MINGW_PACKAGE_PREFIX}-cmake"
+  "${MINGW_PACKAGE_PREFIX}-cc"
+)
+source=(
+  "git+https://gitlab.com/kicad/libraries/kicad-symbols.git#tag=$pkgver"
+  "git+https://gitlab.com/kicad/libraries/kicad-templates.git#tag=$pkgver"
+  "git+https://gitlab.com/kicad/libraries/kicad-footprints.git#tag=$pkgver"
+  "git+https://gitlab.com/kicad/libraries/kicad-packages3D.git#tag=$pkgver"
+)
+sha256sums=(
+  'SKIP'
+  'SKIP'
+  'SKIP'
+  'SKIP'
+)
+
+_sub=("footprints" "symbols" "templates" "packages3D")
+
+build() {
+  cd "${srcdir}"
+
+  for _s in ${_sub[@]}; do
+    cd ${srcdir}
+    msg2 "Build ${_s}"
+    [[ -d build-${_s} ]] && rm -rf build-${_s}
+    mkdir -p build-${_s} && cd build-${_s}
+
+    MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    cmake \
+      -G "MinGW Makefiles" \
+      -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
+    ../${_realname}-${_s}
+  done
+}
+
+for _part in ${_sub[@]}; do
+  eval "package_${MINGW_PACKAGE_PREFIX}-${_realname}-${_part}-git() {
+    options=('!strip')
+    conflicts=(${MINGW_PACKAGE_PREFIX}-${_realname}-${_part})
+    provides=(${MINGW_PACKAGE_PREFIX}-${_realname}-${_part})
+    msg2 \"Package ${_part}\"
+    cd \${srcdir}/build-${_part}
+    mingw32-make DESTDIR=\${pkgdir} install
+  }"
+done
