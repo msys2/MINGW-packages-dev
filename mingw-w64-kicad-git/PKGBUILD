@@ -1,113 +1,171 @@
-# Maintainer: Alexey Pavlov <alexpux@gmail.com>
+# Maintainer: Tim Stahlhut <stahta01@gmail.com>
+
+_do_MAINTAIN_PNGS=no # Needed to rebuild bitmap_info.h
 
 _realname=kicad
+#_git_commit=4db10d419dd3bfd09f055fc52cd965fb7204e97e # 5.99.0.r9716  Does not have GCC 12.1 silent error bug
+#_git_commit=18037e2f65dbdca73dbe3e5d375fa5f86bd33f20 # 5.99.0.r9717  Has GCC 12.1 silent error bug
+#_git_commit=222c4ce7df2433650b62a8cd7ac168b2b233f685 # 5.99.0.r12634 Has GCC 12.1 silent error bug
+#_git_commit=cd8e464339bca217247e51fafc1d6aa3c79260cc # 5.99.0.r12833 fails to set default ucrt64 config
+#_git_commit=e867a4fd27fba140ea90266d373ba20b4768331a # 5.99.0.r12832 works to set default ucrt64 config
+_wx_basever=3.1
+_sourcedir=${_realname}-git
 pkgbase=mingw-w64-${_realname}-git
-_sub=("footprints" "symbols" "templates" "packages3D")
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
-pkgver=r15133.23086decc
+pkgver=6.99.0.r2172.g4043dca613
 pkgrel=1
 pkgdesc="Software for the creation of electronic schematic diagrams and printed circuit board artwork (mingw-w64)"
-arch=("any")
-url="http://www.kicad-pcb.org"
+arch=(any)
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+url="https://www.kicad.org/"
 license=("GPLv3+")
-depends=("${MINGW_PACKAGE_PREFIX}-boost"
-    "${MINGW_PACKAGE_PREFIX}-curl"
-    "${MINGW_PACKAGE_PREFIX}-glew"
-    "${MINGW_PACKAGE_PREFIX}-glm"
-    "${MINGW_PACKAGE_PREFIX}-ngspice"
-    "${MINGW_PACKAGE_PREFIX}-python2"
-    "${MINGW_PACKAGE_PREFIX}-wxPython"
-    "${MINGW_PACKAGE_PREFIX}-wxWidgets"
-    "${MINGW_PACKAGE_PREFIX}-openssl"
-    "${MINGW_PACKAGE_PREFIX}-freeglut"
-    "${MINGW_PACKAGE_PREFIX}-zlib")
-makedepends=("git"
-    "${MINGW_PACKAGE_PREFIX}-cmake"
-    "${MINGW_PACKAGE_PREFIX}-gcc"
-    "${MINGW_PACKAGE_PREFIX}-doxygen"
-    "${MINGW_PACKAGE_PREFIX}-pkg-config"
-    "${MINGW_PACKAGE_PREFIX}-swig"
-    "${MINGW_PACKAGE_PREFIX}-cairo"
-    "${MINGW_PACKAGE_PREFIX}-oce")
-
-source=("${_realname}"::"git+https://github.com/KiCad/kicad-source-mirror.git"
-    "${_realname}-i18n"::"git+https://github.com/KiCad/kicad-i18n.git"
-    "glm_version_ok.patch")
-sha256sums=('SKIP'
-            'SKIP'
-            'dddcfb6b10903b1b3886b7ff26a3a323b62fbfe2a00b7e523ae78b1920da4cda')
+groups=("${MINGW_PACKAGE_PREFIX}-eda")
+options=('!strip')
+#if [[ "${MSYSTEM}" == "UCRT64" ]]; then
+  #options+=('debug')
+#else
+  options+=('!debug')
+#fi
+depends=(
+  "${MINGW_PACKAGE_PREFIX}-boost"
+  "${MINGW_PACKAGE_PREFIX}-curl"
+  "${MINGW_PACKAGE_PREFIX}-glew"
+  "${MINGW_PACKAGE_PREFIX}-glm"
+  "${MINGW_PACKAGE_PREFIX}-ngspice"
+  "${MINGW_PACKAGE_PREFIX}-python"
+#  "${MINGW_PACKAGE_PREFIX}-wxPython"
+  "${MINGW_PACKAGE_PREFIX}-wxmsw${_wx_basever}"
+  "${MINGW_PACKAGE_PREFIX}-openssl"
+  "${MINGW_PACKAGE_PREFIX}-freeglut"
+  "${MINGW_PACKAGE_PREFIX}-zlib"
+  $([[ ${MINGW_PACKAGE_PREFIX} != *-clang-aarch64* ]] && echo "${MINGW_PACKAGE_PREFIX}-opencascade")
+  "${MINGW_PACKAGE_PREFIX}-cairo"
+  $([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-inkscape")
+  $([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-pngcrush")
+)
+makedepends=(
+  'git' 'make' 'patch'
+  "${MINGW_PACKAGE_PREFIX}-cmake"
+  "${MINGW_PACKAGE_PREFIX}-cc"
+  "${MINGW_PACKAGE_PREFIX}-doxygen"
+  "${MINGW_PACKAGE_PREFIX}-pkg-config"
+  "${MINGW_PACKAGE_PREFIX}-swig"
+)
+source=(
+  '002-ki-6.99-cmake-fixes-for-MINGW-CLANG.patch'
+  '003-ki-6.0-code-fixes-for-GNUC-CLANG.patch'
+  '006-ki-6.0-rewrite-kiwin32_rc_for_clang.patch'
+  '007-ki-6.0-manifest-remove-win10-11-manifest-support.patch'
+  '009-ki-6.99-Convert-to-using-std-string-in-bitmap_info.h.in.patch'
+  '009-ki-6.99-regenerate-bitmap_info.h.patch'
+  '010-ki-6.99-Add-wxString-header.patch'
+#  "${_sourcedir}"::"git+https://github.com/KiCad/kicad-source-mirror.git#commit=${_git_commit}"
+  "${_sourcedir}"::"git+https://github.com/KiCad/kicad-source-mirror.git"
+)
+sha256sums=('ac419b1ce1d512b2003211a936f1f2172d5d988f5db7d061169f22d20d95a5b7'
+            'd8d5f4bdd0aa6d8a907710c523f6f95840636cb2ef69e5275c6ed4966f134353'
+            'e03dbb58409145c8fb54991d8259f14bc0ba6b21abca24f9b914ec354c9df89c'
+            'f6c99f22082aa5368a5d53a882763d4aefb0c8257373f7be7d8929f403d16bf7'
+            'dd2899cb9ab968806aab3730aa63b2c5f9585ac975cc0ad64fc7ae92d7e5de86'
+            '602cd5d24298109de6201941ea36c09e79aadd005e5f57354a33411f4c0a51d7'
+            '51925d6374bb612eddc48255b8afc1d206e4eaeeaeb25a85d0a441607f19479a'
+            'SKIP')
+_doc=("ca" "de" "en" "es" "fr" "id" "it" "ja" "nl" "pl" "ru" "zh")
+_sub=("footprints" "symbols" "templates" "packages3D")
 
 pkgver() {
-  cd "${srcdir}/${_realname}"
+  cd ${srcdir}/${_sourcedir}
   ( set -o pipefail
-#    git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    _tag=$( head -n 200 CMakeModules/KiCadVersion.cmake | grep 'KICAD_SEMANTIC_VERSION "' | sed -e 's/KICAD_SEMANTIC_VERSION//' | sed -e 's/-unknown//' | sed -e 's/set//' | tr -d '() "' )
+    _version=$( echo ${_tag} | tr -d '-' )
+    printf "%s.r%s.g%s" "${_version}" $(git rev-list --count ${_tag}..HEAD) $(git rev-parse --short HEAD)
   )
 }
 
 prepare() {
-#  cp -f ${srcdir}/${_realname}/template/kicad.pro ${srcdir}/kicad-templates/
-  
-  [[ -d build-${MINGW_CHOST} ]] && rm -r build-${MINGW_CHOST}
-  [[ -d build-i18n ]] && rm -r build-i18n
-  true
-  
-  # glm_version 9.9.3 is Ok
-  patch -p0 -i ${srcdir}/glm_version_ok.patch
+  cd ${srcdir}/${_sourcedir}
+
+  # The next three patch files are needed to get CLANG64/32 to build
+  patch -Np1 -i "${srcdir}"/002-ki-6.99-cmake-fixes-for-MINGW-CLANG.patch
+  patch -Np1 -i "${srcdir}"/003-ki-6.0-code-fixes-for-GNUC-CLANG.patch
+  patch -Np1 -i "${srcdir}"/006-ki-6.0-rewrite-kiwin32_rc_for_clang.patch
+  # This patch allows me to test program using my old Intel GPU driver under win10
+  patch -Np1 -i "${srcdir}"/007-ki-6.0-manifest-remove-win10-11-manifest-support.patch
+  # These two patches needed for my local PC and server CI build, when using GCC 12.1.0 compiler.
+  if [[ ${_do_MAINTAIN_PNGS} != "yes" ]]; then
+    patch -Np1 -i "${srcdir}"/009-ki-6.99-regenerate-bitmap_info.h.patch
+  else
+    patch -Np1 -i "${srcdir}"/009-ki-6.99-Convert-to-using-std-string-in-bitmap_info.h.in.patch
+  fi
+  patch -Np1 -i "${srcdir}"/010-ki-6.99-Add-wxString-header.patch
 }
 
-build_kicad() {
+build() {
   cd "${srcdir}"
-  # Configure and build KiCad.
-  mkdir -p build-${MINGW_CHOST} && cd build-${MINGW_CHOST}
+  msg2 "Build kicad"
+  [[ -d build-${MSYSTEM} ]] && rm -rf build-${MSYSTEM}
+  mkdir -p build-${MSYSTEM} && cd build-${MSYSTEM}
 
-  declare -a _btype
+  local -a extra_config
   if check_option "debug" "y"; then
-    _btype=Debug
+    extra_config+=( -DCMAKE_BUILD_TYPE=Debug )
   else
-    _btype=Release
+    extra_config+=( -DCMAKE_BUILD_TYPE=Release )
   fi
+
+  if [[ ${MINGW_PACKAGE_PREFIX} != *-clang-aarch64* ]]; then
+    extra_config+=( -DOCC_INCLUDE_DIR=${MINGW_PREFIX}/include/opencascade )
+  fi
+
+  if [[ ${_do_MAINTAIN_PNGS} == "yes" ]]; then
+    extra_config+=( -DMAINTAIN_PNGS=ON )
+  fi
+
+  #if [[ ${MINGW_PACKAGE_PREFIX} != *-clang-* ]]; then
+    #export CXXFLAGS="-pipe"
+    #extra_config+=( -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O0 -DNDEBUG" )
+  #fi
+
+  #extra_config+=( -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON )
 
   MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=;DCMAKE_PREFIX_PATH=;DEFAULT_INSTALL_PATH=" \
   ${MINGW_PREFIX}/bin/cmake.exe \
-    -G"MSYS Makefiles" \
+    -G "MSYS Makefiles" \
     -DCMAKE_PREFIX_PATH=${MINGW_PREFIX} \
     -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-    -DCMAKE_BUILD_TYPE=${_btype} \
+    "${extra_config[@]}" \
     -DDEFAULT_INSTALL_PATH=${MINGW_PREFIX} \
-    -DOPENSSL_ROOT_DIR=${MINGW_PREFIX} \
+    -DwxWidgets_CONFIG_EXECUTABLE=${MINGW_PREFIX}/bin/wx-config-${_wx_basever} \
+    -DKICAD_USE_OCC="$( [[ ${MINGW_PACKAGE_PREFIX} == *-clang-aarch64* ]] && echo "OFF" || echo "ON" )" \
+    -DKICAD_SCRIPTING_WXPYTHON=OFF \
     -DKICAD_SCRIPTING=ON \
-    -DKICAD_SCRIPTING_MODULES=ON \
-    -DKICAD_SCRIPTING_WXPYTHON=ON \
-    -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/python2.exe \
-    ../${_realname}
+    -DKICAD_SCRIPTING_PYTHON3=ON \
+    -DKICAD_BUILD_QA_TESTS=OFF \
+    -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/python.exe \
+    -DPYTHON_INCLUDE_DIR=$(${MINGW_PREFIX}/bin/python.exe -c "from sysconfig import get_paths as gp; print(gp()[\"include\"])") \
+    -DPYTHON_ROOT_DIR=${MINGW_PREFIX} \
+    -DKICAD_BUILD_I18N=ON \
+    ../${_sourcedir}
 
-  make
-
-  cd "${srcdir}"
-  # Configure the translationn installation build.
-  mkdir build-i18n && cd build-i18n
-  
-  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
-  ${MINGW_PREFIX}/bin/cmake.exe \
-    -G "MSYS Makefiles" \
-    -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-    ../${_realname}-i18n
+  if [[ ${_do_MAINTAIN_PNGS} == "yes" ]]; then
+    cd ${srcdir}/${_sourcedir}
+    git diff -- include/bitmaps/bitmap_info.h > ${startdir}/009-ki-6.99-regenerate-bitmap_info.h.patch
+    cd ${srcdir}/build-${MSYSTEM}
+  fi
+  cd ${srcdir}/build-${MSYSTEM}
+  make VERBOSE=1 || make VERBOSE=1 --jobs=1
 }
 
-_doc=("ca" "de" "en" "es" "fr" "id" "it" "ja" "nl" "pl" "ru" "zh")
-for _d in ${_doc[@]}; do _doc_pkg+=("\"${MINGW_PACKAGE_PREFIX}-${_realname}-doc-${_d}: Documentation for KiCad (mingw-w64)\""); done
-for _s in ${_sub[@]}; do _sub_pkg+=("${MINGW_PACKAGE_PREFIX}-${_realname}-${_s}-git"); done
+for _doclang in ${_doc[@]}; do _doc_pkg+=("\"${MINGW_PACKAGE_PREFIX}-${_realname}-doc-${_doclang}: Documentation for KiCad (mingw-w64)\""); done
+for _feature in ${_sub[@]}; do _sub_pkg+=("\"${MINGW_PACKAGE_PREFIX}-${_realname}-${_feature}\""); done
 
 eval "package_${MINGW_PACKAGE_PREFIX}-${_realname}-git() {
-  optdepends+=("${_doc_pkg[@]}" "\${_sub_pkg[@]}")
-  conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
-  
-  build_kicad
-  
-  cd "\"\${srcdir}\"/build-${MINGW_CHOST}"
-  make DESTDIR="\"\${pkgdir}\"" install
 
-  cd "\"\${srcdir}\"/build-i18n"
-  make DESTDIR="\"\${pkgdir}\"" install
+  msg2 \"Package kicad\"
+  optdepends+=(${_doc_pkg[@]} ${_sub_pkg[@]})
+  conflicts=(${MINGW_PACKAGE_PREFIX}-${_realname})
+  provides=(${MINGW_PACKAGE_PREFIX}-${_realname})
+
+  cd \${srcdir}/build-${MSYSTEM}
+  make DESTDIR=\${pkgdir} install
 }"
