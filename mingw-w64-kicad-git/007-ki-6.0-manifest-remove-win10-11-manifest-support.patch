@@ -1,0 +1,70 @@
+From 6a73aa693e89579eb4ad3edb0b28ea671ad1485d Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Fri, 3 Jun 2022 13:35:15 -0400
+Subject: manifest remove win10/11 manifest support
+
+Because some old Intel GPU drivers fail to support openGL when enabled
+---
+ resources/msw/manifests/x64.manifest                | 2 --
+ resources/msw/manifests/x64_dpi_aware_pmv2.manifest | 2 --
+ resources/msw/manifests/x86.manifest                | 2 --
+ resources/msw/manifests/x86_dpi_aware_pmv2.manifest | 2 --
+ 4 files changed, 8 deletions(-)
+
+diff --git a/resources/msw/manifests/x64.manifest b/resources/msw/manifests/x64.manifest
+index a5f27f64b9..6b11d6f504 100644
+--- a/resources/msw/manifests/x64.manifest
++++ b/resources/msw/manifests/x64.manifest
+@@ -34,8 +34,6 @@
+       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+       <!-- Windows 8.1 -->
+       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-      <!-- Windows 10 -->
+-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+     </application>
+   </compatibility>
+ </assembly>
+\ No newline at end of file
+diff --git a/resources/msw/manifests/x64_dpi_aware_pmv2.manifest b/resources/msw/manifests/x64_dpi_aware_pmv2.manifest
+index 34e0ffc8e9..ee246a65b1 100644
+--- a/resources/msw/manifests/x64_dpi_aware_pmv2.manifest
++++ b/resources/msw/manifests/x64_dpi_aware_pmv2.manifest
+@@ -30,8 +30,6 @@
+       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+       <!-- Windows 8.1 -->
+       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-      <!-- Windows 10 -->
+-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+     </application>
+   </compatibility>
+ </assembly>
+\ No newline at end of file
+diff --git a/resources/msw/manifests/x86.manifest b/resources/msw/manifests/x86.manifest
+index 2c8b801f87..c0de5e0970 100644
+--- a/resources/msw/manifests/x86.manifest
++++ b/resources/msw/manifests/x86.manifest
+@@ -34,8 +34,6 @@
+       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+       <!-- Windows 8.1 -->
+       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-      <!-- Windows 10 -->
+-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+     </application>
+   </compatibility>
+ </assembly>
+\ No newline at end of file
+diff --git a/resources/msw/manifests/x86_dpi_aware_pmv2.manifest b/resources/msw/manifests/x86_dpi_aware_pmv2.manifest
+index 8c2d961862..e6c712ed87 100644
+--- a/resources/msw/manifests/x86_dpi_aware_pmv2.manifest
++++ b/resources/msw/manifests/x86_dpi_aware_pmv2.manifest
+@@ -30,8 +30,6 @@
+       <supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />
+       <!-- Windows 8.1 -->
+       <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />
+-      <!-- Windows 10 -->
+-      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+     </application>
+   </compatibility>
+ </assembly>
+\ No newline at end of file
+-- 
