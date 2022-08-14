@@ -1,22 +1,20 @@
 # Maintainer: Tim Stahlhut <stahta01@gmail.com>
 
-_do_MAINTAIN_PNGS=no # Needed to rebuild bitmap_info.h
+#_do_MAINTAIN_PNGS=no # Not needed anymore
 
 _realname=kicad
-#_git_commit=4db10d419dd3bfd09f055fc52cd965fb7204e97e # 5.99.0.r9716  Does not have GCC 12.1 silent error bug
-#_git_commit=18037e2f65dbdca73dbe3e5d375fa5f86bd33f20 # 5.99.0.r9717  Has GCC 12.1 silent error bug
-#_git_commit=222c4ce7df2433650b62a8cd7ac168b2b233f685 # 5.99.0.r12634 Has GCC 12.1 silent error bug
+# GCC 12.1 silent build error bug was avoided by using wxWidgets 3.2 with STL configuration
 #_git_commit=cd8e464339bca217247e51fafc1d6aa3c79260cc # 5.99.0.r12833 fails to set default ucrt64 config
 #_git_commit=e867a4fd27fba140ea90266d373ba20b4768331a # 5.99.0.r12832 works to set default ucrt64 config
-_wx_basever=3.1
+_wx_basever=3.2
 _sourcedir=${_realname}-git
 pkgbase=mingw-w64-${_realname}-git
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
-pkgver=6.99.0.r2172.g4043dca613
+pkgver=6.99.0.r2821.g2ee65b2d83
 pkgrel=1
 pkgdesc="Software for the creation of electronic schematic diagrams and printed circuit board artwork (mingw-w64)"
 arch=(any)
-mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clang32' 'mingw32')
 url="https://www.kicad.org/"
 license=("GPLv3+")
 groups=("${MINGW_PACKAGE_PREFIX}-eda")
@@ -31,17 +29,19 @@ depends=(
   "${MINGW_PACKAGE_PREFIX}-curl"
   "${MINGW_PACKAGE_PREFIX}-glew"
   "${MINGW_PACKAGE_PREFIX}-glm"
-  "${MINGW_PACKAGE_PREFIX}-ngspice"
+# 'mingw32' gives "cc1plus.exe: out of memory allocating 65536 bytes"
+# on sim_model_ngspice_data.cpp file.
+  $([[ ${MSYSTEM} != MINGW32 ]] && echo "${MINGW_PACKAGE_PREFIX}-ngspice")
   "${MINGW_PACKAGE_PREFIX}-python"
 #  "${MINGW_PACKAGE_PREFIX}-wxPython"
-  "${MINGW_PACKAGE_PREFIX}-wxmsw${_wx_basever}"
+  "${MINGW_PACKAGE_PREFIX}-wxwidgets${_wx_basever}-msw-libs"
   "${MINGW_PACKAGE_PREFIX}-openssl"
   "${MINGW_PACKAGE_PREFIX}-freeglut"
   "${MINGW_PACKAGE_PREFIX}-zlib"
   $([[ ${MINGW_PACKAGE_PREFIX} != *-clang-aarch64* ]] && echo "${MINGW_PACKAGE_PREFIX}-opencascade")
   "${MINGW_PACKAGE_PREFIX}-cairo"
-  $([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-inkscape")
-  $([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-pngcrush")
+  #$([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-inkscape")
+  #$([[ ${_do_MAINTAIN_PNGS} == "yes" ]] && echo "${MINGW_PACKAGE_PREFIX}-pngcrush")
 )
 makedepends=(
   'git' 'make' 'patch'
@@ -50,25 +50,22 @@ makedepends=(
   "${MINGW_PACKAGE_PREFIX}-doxygen"
   "${MINGW_PACKAGE_PREFIX}-pkg-config"
   "${MINGW_PACKAGE_PREFIX}-swig"
+  "${MINGW_PACKAGE_PREFIX}-wxwidgets${_wx_basever}-msw"
 )
 source=(
   '002-ki-6.99-cmake-fixes-for-MINGW-CLANG.patch'
   '003-ki-6.0-code-fixes-for-GNUC-CLANG.patch'
+  '005-ki-6.0-Skip-ffloat-store-under-CLANG.patch'
   '006-ki-6.0-rewrite-kiwin32_rc_for_clang.patch'
   '007-ki-6.0-manifest-remove-win10-11-manifest-support.patch'
-  '009-ki-6.99-Convert-to-using-std-string-in-bitmap_info.h.in.patch'
-  '009-ki-6.99-regenerate-bitmap_info.h.patch'
-  '010-ki-6.99-Add-wxString-header.patch'
 #  "${_sourcedir}"::"git+https://github.com/KiCad/kicad-source-mirror.git#commit=${_git_commit}"
   "${_sourcedir}"::"git+https://github.com/KiCad/kicad-source-mirror.git"
 )
-sha256sums=('ac419b1ce1d512b2003211a936f1f2172d5d988f5db7d061169f22d20d95a5b7'
+sha256sums=('6aed28addf1aac14acbb770bd18d6e3a0767ebb31b128b1a3f38e4a07ee21a25'
             'd8d5f4bdd0aa6d8a907710c523f6f95840636cb2ef69e5275c6ed4966f134353'
+            'f9cd1cbbafe98a76e0bd7cb61ab76b05b5a2c22848dd5ea8042c06e0c4864288'
             'e03dbb58409145c8fb54991d8259f14bc0ba6b21abca24f9b914ec354c9df89c'
             'f6c99f22082aa5368a5d53a882763d4aefb0c8257373f7be7d8929f403d16bf7'
-            'dd2899cb9ab968806aab3730aa63b2c5f9585ac975cc0ad64fc7ae92d7e5de86'
-            '602cd5d24298109de6201941ea36c09e79aadd005e5f57354a33411f4c0a51d7'
-            '51925d6374bb612eddc48255b8afc1d206e4eaeeaeb25a85d0a441607f19479a'
             'SKIP')
 _doc=("ca" "de" "en" "es" "fr" "id" "it" "ja" "nl" "pl" "ru" "zh")
 _sub=("footprints" "symbols" "templates" "packages3D")
@@ -76,7 +73,7 @@ _sub=("footprints" "symbols" "templates" "packages3D")
 pkgver() {
   cd ${srcdir}/${_sourcedir}
   ( set -o pipefail
-    _tag=$( head -n 200 CMakeModules/KiCadVersion.cmake | grep 'KICAD_SEMANTIC_VERSION "' | sed -e 's/KICAD_SEMANTIC_VERSION//' | sed -e 's/-unknown//' | sed -e 's/set//' | tr -d '() "' )
+    _tag=$( head -n 200 cmake/KiCadVersion.cmake | grep 'KICAD_SEMANTIC_VERSION "' | sed -e 's/KICAD_SEMANTIC_VERSION//' | sed -e 's/-unknown//' | sed -e 's/set//' | tr -d '() "' )
     _version=$( echo ${_tag} | tr -d '-' )
     printf "%s.r%s.g%s" "${_version}" $(git rev-list --count ${_tag}..HEAD) $(git rev-parse --short HEAD)
   )
@@ -89,15 +86,9 @@ prepare() {
   patch -Np1 -i "${srcdir}"/002-ki-6.99-cmake-fixes-for-MINGW-CLANG.patch
   patch -Np1 -i "${srcdir}"/003-ki-6.0-code-fixes-for-GNUC-CLANG.patch
   patch -Np1 -i "${srcdir}"/006-ki-6.0-rewrite-kiwin32_rc_for_clang.patch
+  patch -Np1 -i "${srcdir}"/005-ki-6.0-Skip-ffloat-store-under-CLANG.patch
   # This patch allows me to test program using my old Intel GPU driver under win10
   patch -Np1 -i "${srcdir}"/007-ki-6.0-manifest-remove-win10-11-manifest-support.patch
-  # These two patches needed for my local PC and server CI build, when using GCC 12.1.0 compiler.
-  if [[ ${_do_MAINTAIN_PNGS} != "yes" ]]; then
-    patch -Np1 -i "${srcdir}"/009-ki-6.99-regenerate-bitmap_info.h.patch
-  else
-    patch -Np1 -i "${srcdir}"/009-ki-6.99-Convert-to-using-std-string-in-bitmap_info.h.in.patch
-  fi
-  patch -Np1 -i "${srcdir}"/010-ki-6.99-Add-wxString-header.patch
 }
 
 build() {
@@ -105,6 +96,9 @@ build() {
   msg2 "Build kicad"
   [[ -d build-${MSYSTEM} ]] && rm -rf build-${MSYSTEM}
   mkdir -p build-${MSYSTEM} && cd build-${MSYSTEM}
+
+  # Possible CI Server and local build error fix.
+  export pythonLocation="${MINGW_PREFIX}/bin/python"
 
   local -a extra_config
   if check_option "debug" "y"; then
@@ -117,9 +111,9 @@ build() {
     extra_config+=( -DOCC_INCLUDE_DIR=${MINGW_PREFIX}/include/opencascade )
   fi
 
-  if [[ ${_do_MAINTAIN_PNGS} == "yes" ]]; then
-    extra_config+=( -DMAINTAIN_PNGS=ON )
-  fi
+  #if [[ ${_do_MAINTAIN_PNGS} == "yes" ]]; then
+    #extra_config+=( -DMAINTAIN_PNGS=ON )
+  #fi
 
   #if [[ ${MINGW_PACKAGE_PREFIX} != *-clang-* ]]; then
     #export CXXFLAGS="-pipe"
@@ -137,9 +131,8 @@ build() {
     -DDEFAULT_INSTALL_PATH=${MINGW_PREFIX} \
     -DwxWidgets_CONFIG_EXECUTABLE=${MINGW_PREFIX}/bin/wx-config-${_wx_basever} \
     -DKICAD_USE_OCC="$( [[ ${MINGW_PACKAGE_PREFIX} == *-clang-aarch64* ]] && echo "OFF" || echo "ON" )" \
+    -DKICAD_SPICE="$( [[ ${MSYSTEM} == MINGW32 ]] && echo "OFF" || echo "ON" )" \
     -DKICAD_SCRIPTING_WXPYTHON=OFF \
-    -DKICAD_SCRIPTING=ON \
-    -DKICAD_SCRIPTING_PYTHON3=ON \
     -DKICAD_BUILD_QA_TESTS=OFF \
     -DPYTHON_EXECUTABLE=${MINGW_PREFIX}/bin/python.exe \
     -DPYTHON_INCLUDE_DIR=$(${MINGW_PREFIX}/bin/python.exe -c "from sysconfig import get_paths as gp; print(gp()[\"include\"])") \
@@ -147,13 +140,7 @@ build() {
     -DKICAD_BUILD_I18N=ON \
     ../${_sourcedir}
 
-  if [[ ${_do_MAINTAIN_PNGS} == "yes" ]]; then
-    cd ${srcdir}/${_sourcedir}
-    git diff -- include/bitmaps/bitmap_info.h > ${startdir}/009-ki-6.99-regenerate-bitmap_info.h.patch
-    cd ${srcdir}/build-${MSYSTEM}
-  fi
-  cd ${srcdir}/build-${MSYSTEM}
-  make VERBOSE=1 || make VERBOSE=1 --jobs=1
+  "${MINGW_PREFIX}"/bin/cmake.exe --build . # --parallel 1 --verbose
 }
 
 for _doclang in ${_doc[@]}; do _doc_pkg+=("\"${MINGW_PACKAGE_PREFIX}-${_realname}-doc-${_doclang}: Documentation for KiCad (mingw-w64)\""); done
@@ -167,5 +154,5 @@ eval "package_${MINGW_PACKAGE_PREFIX}-${_realname}-git() {
   provides=(${MINGW_PACKAGE_PREFIX}-${_realname})
 
   cd \${srcdir}/build-${MSYSTEM}
-  make DESTDIR=\${pkgdir} install
+  DESTDIR=\${pkgdir} \${MINGW_PREFIX}/bin/cmake.exe --install .
 }"
