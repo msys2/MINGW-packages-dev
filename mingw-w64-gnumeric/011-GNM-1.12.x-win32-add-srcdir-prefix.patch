@@ -1,0 +1,37 @@
+From 6c23dadedbbc25628e5c83bfbaca864056a382f5 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Mon, 21 Dec 2020 12:48:27 -0500
+Subject: win32 add "$(srcdir)/" prefix
+
+---
+ doc/Makefile.am | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/doc/Makefile.am b/doc/Makefile.am
+index 1287c17ff..6f36df5b9 100644
+--- a/doc/Makefile.am
++++ b/doc/Makefile.am
+@@ -530,7 +530,7 @@ install-exec-hook:
+ 		helpdir="$(DESTDIR)$(HELP_DIR)/$$d/$(HELP_ID)"; \
+ 		install -d $$helpdir; \
+ 		$(RM) $$helpdir/index.docbook; \
+-		$(LN_S) gnumeric.xml $$helpdir/index.docbook; \
++		$(LN_S) $(srcdir)/C/gnumeric.xml $$helpdir/index.docbook; \
+ 	done
+ 
+ uninstall-hook:
+@@ -543,11 +543,11 @@ functions_xml_parts = C/func.defs C/func-header.xml C/func-footer.xml
+ 
+ C/functions.xml: $(srcdir)/make-func-list.pl $(functions_xml_parts)
+ 	(cat $(srcdir)/C/func-header.xml ;				\
+-	 $(PERL) $(srcdir)/make-func-list.pl C/func.defs ;		\
++	 $(PERL) $(srcdir)/make-func-list.pl $(srcdir)/C/func.defs ;		\
+ 	 cat $(srcdir)/C/func-footer.xml				\
+ 	) >functions.tmp ;						\
+ 	if xmllint -noent --nonet --format --encode "UTF-8" functions.tmp >functions.out ; then	\
+-	    mv functions.out $@; rm functions.tmp;					\
++	    mv functions.out $(srcdir)/$@; rm functions.tmp;					\
+ 	fi
+ 
+ C/func.defs: # $(top_builddir)/src/gnumeric$(EXEEXT)
+-- 

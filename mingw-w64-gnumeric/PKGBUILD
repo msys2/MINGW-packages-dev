@@ -1,0 +1,183 @@
+# Contributor: Tim Stahlhut <stahta01@gmail.com>
+
+_realname=gnumeric
+_sourcedir=${_realname}-git
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-git")
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=1.12.53.0
+pkgrel=1
+pkgdesc="Spreadsheet Program (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64')
+url="http://www.gnumeric.org/"
+license=('GPL')
+options=('!strip' 'debug') # Debug
+#options=('strip' '!debug') # Release
+checkdepends=( perl )
+depends=(${MINGW_PACKAGE_PREFIX}-drmingw 
+         ${MINGW_PACKAGE_PREFIX}-goffice)
+makedepends=(
+  ${MINGW_PACKAGE_PREFIX}-cc
+  ${MINGW_PACKAGE_PREFIX}-libxml2
+  ${MINGW_PACKAGE_PREFIX}-itstool
+  ${MINGW_PACKAGE_PREFIX}-pkg-config
+  ${MINGW_PACKAGE_PREFIX}-libtool
+  ${MINGW_PACKAGE_PREFIX}-pygobject-devel
+  ${MINGW_PACKAGE_PREFIX}-docbook-xml              # May or May not be needed; since, I have tried to disable doc building
+#  ${MINGW_PACKAGE_PREFIX}-gobject-introspection   # Should not be needed since the configure option is disabled
+  ${MINGW_PACKAGE_PREFIX}-python-gobject
+  ${MINGW_PACKAGE_PREFIX}-gtk-doc                  # Was needed by autogen.sh
+  ${MINGW_PACKAGE_PREFIX}-yelp-tools               # May or May not be needed; since, I have tried to disable doc building
+  autoconf-archive
+  autoconf
+  automake-wrapper
+  bison
+  libtool
+  make
+  patch
+  git
+  intltool
+  perl
+)
+optdepends=("${MINGW_PACKAGE_PREFIX}-python-gobject: for python plugin support"
+            "perl: for perl plugin support"
+            "${MINGW_PACKAGE_PREFIX}-yelp: for viewing the help manual")
+_git_commit=
+_git_tag=GNUMERIC_1_12_53
+
+_git_repo_url="git+https://gitlab.gnome.org/GNOME/gnumeric.git"
+if [ -n "$_git_tag" ]; then
+  source=(${_sourcedir}::"${_git_repo_url}#tag=$_git_tag")
+elif [ -n "$_git_commit" ]; then
+  source=(${_sourcedir}::"${_git_repo_url}#commit=$_git_commit")
+else
+  source=(${_sourcedir}::"${_git_repo_url}")
+fi
+source+=(
+          001-GNM-1.12.37-msys-remove-no-longer-needed-code.patch
+          002-GNM-1.12.x-Add-extern-prefix-to-GNM_VAR_DECL.patch
+          003-GNM-1.12.0-msys-sheet_style_apply_border.patch
+          004-GNM-1.12.x-win32-comment-out-build-using-hhc.patch
+          005-GNM-1.12.x-patch-icon-Makefile.diff
+          007-GNM-1.12.0-gcc-asm-comment-out-asm-code.patch
+          010-GNM-1.12.8-msys-add-ExcHndlInit.patch
+          011-GNM-1.12.x-win32-add-srcdir-prefix.patch)
+sha256sums=('SKIP'
+            '2c3a877c2b6a6839e86189379228d92f2c624bdefb27f81a0238d11409ac4bf0'
+            '20767bb7902c49d70f85e98f73ff726274252ca6f9479575ba5248d45e7cb5ed'
+            '76c4a80211efc4d3ff0c05e20a297014e8c6d70de604aa90a13a33ce42aafead'
+            'd7baec4d79a20ef8717984f2e458bf3ed005df657bb456b1d3447e4d088ff277'
+            'def9444424a85af6ba377e39c6277c327135a537680cf23487e1c831427809a8'
+            'ac16af48e839bd69f9ac873ef5113c990a8008a53c371d6009751b85b6d16f12'
+            '613bf62d5b4c126ed715a0dccb394fcac24732d994b53b4aa649b4e19c72c441'
+            'a85a3c0687484f76d89dc30e10b52edbe2d08625eab5a0d7d425f80ec25d8988')
+
+# Declare global variables; begin with underscore to avoid name conflicts
+_git_base_commit=
+_git_nearest_tag=
+
+pkgver() {
+  cd ${srcdir}/${_sourcedir}
+
+  local _epoch=$(head -n 34 configure.ac | grep 'm4_define(\[gnumeric_version_epoch\]' | sed -e 's/.* //' | tr '\n' '.' | tr -d '\[\])' | sed 's/.$/\n/')
+  local _major=$(head -n 34 configure.ac | grep 'm4_define(\[gnumeric_version_major\]' | sed -e 's/.* //' | tr '\n' '.' | tr -d '\[\])' | sed 's/.$/\n/')
+  local _minor=$(head -n 34 configure.ac | grep 'm4_define(\[gnumeric_version_minor\]' | sed -e 's/.* //' | tr '\n' '.' | tr -d '\[\])' | sed 's/.$/\n/')
+  local _extra=$(head -n 34 configure.ac | grep 'm4_define(\[gnumeric_version_extra\]' | sed -e 's/.* //' | tr '\n' '.' | tr -d '\[\])' | sed 's/.$/\n/')
+  if [ -z "$_extra" ]; then
+    _extra=0
+  fi
+  if [ -n "$_git_tag" ]; then
+    printf "%s.%s.%s.%s" "$_epoch" "$_major" "$_minor" "$_extra"
+  else
+    printf "%s.%s.%s.%s.v+%s.c%s.g%s" "$_epoch" "$_major" "$_minor" "$_extra" $(git rev-list --count $(git rev-list -1 ${_git_base_commit} configure.ac)..${_git_base_commit}) $(git rev-list --count ${_git_base_commit}..HEAD) $(git rev-parse --short ${_git_base_commit})
+  fi
+}
+
+prepare() {
+  cd ${srcdir}/${_sourcedir}
+
+  _git_base_commit=$( git rev-parse HEAD )
+  _git_nearest_tag=$( git describe --abbrev=0 --tags )
+  echo "_git_nearest_tag := $_git_nearest_tag"
+
+  GIT_AM="git am --committer-date-is-author-date"
+
+  git config --local user.name  "nobody"
+  git config --local user.email "nobody@example.com"
+
+  # Fix configure errors
+  # Fix compiling errors
+  ${GIT_AM} ${srcdir}/001-GNM-1.12.37-msys-remove-no-longer-needed-code.patch
+  # Fix compiler/assembler errors
+  ${GIT_AM} ${srcdir}/007-GNM-1.12.0-gcc-asm-comment-out-asm-code.patch
+  # Fix linking errors
+  ${GIT_AM} ${srcdir}/002-GNM-1.12.x-Add-extern-prefix-to-GNM_VAR_DECL.patch
+  ${GIT_AM} ${srcdir}/003-GNM-1.12.0-msys-sheet_style_apply_border.patch
+  # Fix doc build errors
+  ${GIT_AM} ${srcdir}/004-GNM-1.12.x-win32-comment-out-build-using-hhc.patch
+  # Fix run-time errors
+  # Fix packaging errors
+  ${GIT_AM} ${srcdir}/011-GNM-1.12.x-win32-add-srcdir-prefix.patch
+  # Add run-time crash logging
+  ${GIT_AM} ${srcdir}/010-GNM-1.12.8-msys-add-ExcHndlInit.patch
+
+  NOCONFIGURE=1 ./autogen.sh
+}
+
+build() {
+  [[ -d "${srcdir}"/build-${CARCH} ]] && rm -rf "${srcdir}"/build-${CARCH}
+  mkdir -p "${srcdir}"/build-${CARCH} && cd "${srcdir}"/build-${CARCH}
+
+  CPPFLAGS+=" -Wno-deprecated-declarations"
+  LDFLAGS+=" -lexchndl"
+
+  # Disabled psiconv because no psiconv package found.
+  # Disabled introspection because of build errors.
+  # Disabled silent-rules and schemas-compile based on ArchLinux package.
+
+  PERL=/usr/bin/perl \
+  INTLTOOL_PERL=/usr/bin/perl \
+  ../${_sourcedir}/configure \
+      --prefix=${MINGW_PREFIX} \
+      --host=${MINGW_CHOST} \
+      --target=${MINGW_CHOST} \
+      --build=${MINGW_CHOST} \
+      --with-perl \
+      --without-psiconv \
+      --enable-gtk-doc=no \
+      --enable-gtk-doc-html=no \
+      --enable-nls \
+      --disable-maintainer-mode \
+      --disable-schemas-compile \
+      --disable-introspection \
+      --disable-silent-rules
+
+  local WINPREFIX=$(cygpath -m ${MINGW_PREFIX})
+  local UNIXPREFIX=$(cygpath -u ${MINGW_PREFIX})
+
+  # the local project libtool is having problems with linker search path
+  # libtool:   error: Could not determine the host path corresponding to
+  sed -i "s|-L${WINPREFIX}|-L${UNIXPREFIX}|g" "${srcdir}/build-${CARCH}/src/Makefile"
+
+  make -j1 V=1
+}
+
+check() {
+  cd "${srcdir}"/build-${CARCH}
+
+  make V=1 -j1 -k check || true
+}
+
+package() {
+  cd "${srcdir}"/build-${CARCH}
+
+  patch --forward -p0 -i ${srcdir}/005-GNM-1.12.x-patch-icon-Makefile.diff || true # 1.12.10 patched okay
+
+  make DESTDIR="${pkgdir}" install
+
+  install -Dm644 ${srcdir}/${_sourcedir}/COPYING ${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE
+  install -Dm644 ${srcdir}/${_sourcedir}/COPYING-gpl2 ${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING-gpl2
+  install -Dm644 ${srcdir}/${_sourcedir}/COPYING-gpl3 ${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING-gpl3
+}
