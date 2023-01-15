@@ -1,0 +1,22 @@
+From 4a165e41740c35a98151d28d3ac80e8c87628fd5 Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Sat, 5 Dec 2020 22:32:10 -0500
+Subject: msys export sheet_style_apply_border
+
+---
+ src/Makefile.am | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 8b9d88980..f2cf34184 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -685,6 +685,6 @@ endif
+ if WITH_WIN32
+ libspreadsheet.def: local.def
+ 	echo EXPORTS > $@ && \
+-	cat $^ | sort >> $@
++	echo sheet_style_apply_border | cat - $^ | sort >> $@
+ 
+ local.def: stamp-local.def
+-- 

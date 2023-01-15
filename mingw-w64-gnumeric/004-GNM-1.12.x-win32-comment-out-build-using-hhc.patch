@@ -1,0 +1,40 @@
+From a5b01dfca9d1f7491ead11142371c759db3b766c Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Mon, 21 Dec 2020 09:48:32 -0500
+Subject: win32: comment out build using hhc.exe
+
+---
+ doc/Makefile.am | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/doc/Makefile.am b/doc/Makefile.am
+index 1287c17ff..b056e2070 100644
+--- a/doc/Makefile.am
++++ b/doc/Makefile.am
+@@ -603,14 +603,14 @@ EXTRA_DIST += $(manpage_DATA)
+ 
+ winhelp_DATA =
+ winhelpdir=$(gnumeric_datadir)/$(subdir)
+-if WITH_WIN32
+-winhelp_DATA += gnumeric.chm gnumeric.hhmap
+-
+-gnumeric.hhmap: chm-stamp
+-	-(cd C/chm && wine 'C:\Program Files\HTML Help Workshop\hhc.exe' gnumeric.hhp)
+-	cp C/chm/gnumeric.hhmap .
+-
+-gnumeric.chm: gnumeric.hhmap
+-	cp C/chm/gnumeric.chm .
+-
+-endif
++#if WITH_WIN32
++#winhelp_DATA += gnumeric.chm gnumeric.hhmap
++#
++#gnumeric.hhmap: chm-stamp
++#	-(cd C/chm && wine 'C:\Program Files\HTML Help Workshop\hhc.exe' gnumeric.hhp)
++#	cp C/chm/gnumeric.hhmap .
++#
++#gnumeric.chm: gnumeric.hhmap
++#	cp C/chm/gnumeric.chm .
++#
++#endif
+-- 

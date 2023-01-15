@@ -1,0 +1,23 @@
+From 88514a390d7352a31f71e6059a59268cfa39e17f Mon Sep 17 00:00:00 2001
+From: Tim Stahlhut <stahta01@gmail.com>
+Date: Sat, 19 Dec 2020 14:09:06 -0500
+Subject: Add extern prefix to GNM_VAR_DECL
+
+---
+ src/libgnumeric.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libgnumeric.h b/src/libgnumeric.h
+index 36957b41f..bf21798e3 100644
+--- a/src/libgnumeric.h
++++ b/src/libgnumeric.h
+@@ -8,7 +8,7 @@ G_BEGIN_DECLS
+ #ifndef GNM_VAR_DECL
+ #  ifdef WIN32
+ #    ifdef GNUMERIC_INTERNAL
+-#      define GNM_VAR_DECL __declspec(dllexport)
++#      define GNM_VAR_DECL extern __declspec(dllexport)
+ #    else
+ #      define GNM_VAR_DECL extern __declspec(dllimport)
+ #    endif
+-- 
