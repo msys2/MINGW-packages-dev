@@ -9,7 +9,7 @@ pkgname=(
 provides=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 conflicts=("${MINGW_PACKAGE_PREFIX}-${_realname}")
 pkgver=0.10.53.0
-pkgrel=1
+pkgrel=2
 pkgdesc="A GLib/GTK+ set of document-centric objects and utilities (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64')
@@ -28,7 +28,7 @@ makedepends=(
   ${MINGW_PACKAGE_PREFIX}-lasem
   ${MINGW_PACKAGE_PREFIX}-gtk-doc
   ${MINGW_PACKAGE_PREFIX}-gobject-introspection
-  libtool
+  ${MINGW_PACKAGE_PREFIX}-libtool
   intltool
   autoconf-archive
   automake-wrapper
@@ -71,12 +71,14 @@ build() {
 
   # Added without-long-double to stop build errors
   # Added enable-gtk-doc-html=no to stop build errors
+  # --with-config-backend=gsettings|keyfile|win32
 
   ../${_sourcedir}/configure \
       --prefix=${MINGW_PREFIX} \
       --host=${MINGW_CHOST} \
       --target=${MINGW_CHOST} \
       --build=${MINGW_CHOST} \
+      --with-config-backend=gsettings \
       --without-long-double \
       --enable-shared \
       --disable-static \
