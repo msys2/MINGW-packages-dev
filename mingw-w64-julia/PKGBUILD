@@ -1,0 +1,289 @@
+####
+#
+# Based partly on package(s) or directions found at these URLs
+#     https://www.archlinux.org/packages/community/x86_64/julia/
+#     https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/build.md
+#     https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/windows.md
+#     https://github.com/JuliaLang/julia/blob/master/doc/src/devdocs/build/distributing.md
+#     https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md
+#
+# Maintainer: gym603 <gui_yuan_miao@163.com>
+# Contributor: Tim Stahlhut <stahta01@gmail.com>
+#
+####
+#
+# Normal build command
+#   makepkg-mingw -sLf --nocheck
+#
+# Added tty and msg2 start and finish messages because of makepkg log
+#   lockups. They help to figure out which tee command to kill.
+#
+####
+
+_do_extra_clean=1         # 0 or 1    (PR value is 1)
+_make_verbose=0           # 0 or 1    (PR value is 0)
+_show_log_lockup_info=0   # 0 or 1    (PR value is 0)
+
+_realname=julia
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=1.8.3
+pkgrel=1
+_rc=
+_sourcedir=${_realname}-${pkgver}${_rc}
+pkgdesc="High-level, high-performance, dynamic programming language for technical computing (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64')
+url="https://julialang.org/"
+license=('MIT')
+makedepends=("${MINGW_PACKAGE_PREFIX}-diffutils"
+             "${MINGW_PACKAGE_PREFIX}-python"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-gcc-fortran"
+             "${MINGW_PACKAGE_PREFIX}-curl")
+source=(${_sourcedir}.tar.gz::"https://github.com/JuliaLang/julia/releases/download/v${pkgver}/${_realname}-${pkgver}${_rc}.tar.gz"
+        #${_sourcedir}.tar.gz::"https://github.com/JuliaLang/julia/archive/refs/tags/v${pkgver}${_rc}.tar.gz"
+        004-1.1.1-msys2-fix-base-floatfuncs.jl.patch
+        007-1.8.3-pkgbuild-make-install-no-build.patch
+        009-1.1.1-msys2-find-modname-in-julia_dl-before-default-paths.patch
+        012-1.8.3-msys2-remove-USING_SJLJ_EXCEPTIONS.patch
+        015-1.6.x-mingw-use-O2-instead-of-O3.patch
+        016-1.3.0-msys2-Add-SRCCACHE-LIBGIT2_SRC_DIR-source-extracted-target.patch
+        020-1.8.3-msys2-fix-tools-common.mk.patch
+        021-msys2-workaround-copy-bug.patch
+        022-1.8.3-msys2-fix-STD_LIB_PATH-in-csl.mk.patch
+        023-1.8.0-backport-don-t-use-hardcode-LLVM_SHARED_LIB_NAME.patch
+        julia.sh
+       )
+sha256sums=('4d8d460fcae5c6f8306a3e3c14371635c1a26f47c3ce62b2950cf9234b6ec849'
+            '221023d4ebf2721a9b5cedbc6a3550c26c3c9897f5332a6ea4a68ec1f1510b05'
+            '77c72ec36c110cd088ef3a9b5bf52e3ed36da5c4dd3bc974b8ae46e4533d0251'
+            'f82628d0a12c1503ce3a032c6194392f257f49c03724d6788a6d7f5789e33982'
+            'f78748f27cf26b9e161fbf97a007a63b09b2e55bebc5d93d8d11e247557c43bf'
+            '0666694ff710a9059c4646f8c8a2b40069f9c960653794ab71981b424762cd7c'
+            '9ad3bd47d1b9f30bb42346495eca012e9be74e626d008a80882be3f5e30af91a'
+            '8a05186373fabc9d6902d66d50bad0653dfc1661c37fb60b811178e10ee32726'
+            'a58cef02cce2e41c647afb72be926056e574239589b5a3152aa2b02f40ba3d36'
+            'caa7512c1c1efc3d0c64eec85d26cf50662ae82a3511ea0331b03b566b30de17'
+            'c8c2521321e64d455e1403d581aa8062e735a9c7f79f5918dad876b405940958'
+            'f1cbe3ec364caaaaee1441e9e280e2c10d24d92b6540eb9a58e29b32c825a3f3')
+
+apply_patch_with_msg() {
+  for _patch in "$@"
+  do
+    msg2 "Applying ${_patch}"
+    patch -Nbp1 -i "${srcdir}/${_patch}"
+  done
+}
+
+_make_user_config () {
+  # Delete the user configuration file
+  if [[ -f "Make.user" ]]; then
+    rm Make.user
+  fi
+  #if [[ "${MSYSTEM}" == "UCRT64" ]]; then
+    ## Create the file with just the line comment charactor in it
+    #echo '#' > Make.user
+    ## The below results in an Julia that builds; but, fails because of
+    ## UCRT changes right after the Sysimage is built.
+    ## memset library was moved as part of UCRT changes.
+    #echo 'DEPS_GIT = 1' >> Make.user
+    #echo 'USE_BINARYBUILDER_CSL = 0' >> Make.user
+    #echo 'USE_BINARYBUILDER_LLVM = 0' >> Make.user
+    #echo 'USE_BINARYBUILDER_GMP = 0' >> Make.user
+    #echo 'USE_BINARYBUILDER_OPENBLAS = 0' >> Make.user
+    #echo 'USE_BINARYBUILDER_LIBUV = 0' >> Make.user
+  #fi
+}
+
+prepare() {
+  cd "${srcdir}/${_sourcedir}"
+
+  apply_patch_with_msg \
+    007-1.8.3-pkgbuild-make-install-no-build.patch \
+    015-1.6.x-mingw-use-O2-instead-of-O3.patch \
+    020-1.8.3-msys2-fix-tools-common.mk.patch
+
+  ## These patch files are needed to build extra deps from source
+  ## The deps like LLVM and Compiler Support Libs (CSL).
+  #apply_patch_with_msg \
+    #012-1.8.3-msys2-remove-USING_SJLJ_EXCEPTIONS.patch \
+    #021-msys2-workaround-copy-bug.patch \
+    #022-1.8.3-msys2-fix-STD_LIB_PATH-in-csl.mk.patch \
+    #023-1.8.0-backport-don-t-use-hardcode-LLVM_SHARED_LIB_NAME.patch
+
+  # patches that might not be a good idea to apply
+  # They need checked by an Advanced Julia user/MSys2 Mingw packager
+  # 004-1.1.1-msys2-fix-base-floatfuncs.jl.patch
+  # 009-1.1.1-msys2-find-modname-in-julia_dl-before-default-paths.patch
+
+  # patches that still can be applied; but, seem to be no longer needed;
+  # but, might be needed again in the future
+  #apply_patch_with_msg \
+    #016-1.3.0-msys2-Add-SRCCACHE-LIBGIT2_SRC_DIR-source-extracted-target.patch
+
+  msg2 "directory copy starting"
+  cp -rp  "${srcdir}/${_sourcedir}/." "${srcdir}/build-${MSYSTEM}"
+  msg2 "directory copy finished"
+
+  cd "${srcdir}/build-${MSYSTEM}"
+  _make_user_config; # create Make.user in current directory
+  if [[ "$_show_log_lockup_info" == "1" ]]; then
+    tty
+    msg2 "prepare finished"
+  fi
+}
+
+build() {
+  ####  Information found during builds of Julia 1.8.3 using MSys2
+  #     MINGW64 GCC 12.2.0
+  # LB Fail LLVM 13.0.1-3 Fixed by 020 patch
+  #
+  #####
+  # BB means Binary Build done by Julia server
+  # SB means System Build done by MSys2 package
+  # LB means Local Build done by Julia make system running locally
+  ####
+  if [[ "$_show_log_lockup_info" == "1" ]]; then
+    msg2 "build started"
+  fi
+
+  if [[ "$_do_extra_clean" == "1" ]]; then
+    [[ -d "${srcdir}/build-${MSYSTEM}/deps/scratch" ]] && rm -rf "${srcdir}/build-${MSYSTEM}/deps/scratch"
+  fi
+  # These are needed to clean out some of the prior built files; should be faster than make clean
+  [[ -d "${srcdir}/build-${MSYSTEM}/usr-staging" ]] && rm -rf "${srcdir}/build-${MSYSTEM}/usr-staging"
+  [[ -d "${srcdir}/build-${MSYSTEM}/usr" ]] && rm -rf "${srcdir}/build-${MSYSTEM}/usr"
+
+  # This takes time; when building UCRT64 skipping this may help CI Server build time
+  cd "${srcdir}/build-${MSYSTEM}" && \
+    make VERBOSE=${_make_verbose} clean
+
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  ####
+  # From makepkg_mingw.conf on 2023-02-09
+  # CXXFLAGS="-march=pentium4 -mtune=generic -O2 -pipe"
+  # CFLAGS="-march=pentium4 -mtune=generic -O2 -pipe -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-strong"
+  ##
+  case "${CARCH}" in
+    i686)
+      export CFLAGS="-march=pentium4 -mtune=generic -pipe"
+      export CXXFLAGS="-march=pentium4 -mtune=generic -pipe"
+    ;;
+  esac
+
+  ####
+  #   CSL, GMP, and LLVM are C++ modules; to build UCRT64, all three
+  # will need to be built; and, likely many other modules will also need
+  # re-builling with the UCRT64 GCC toolchain because of run-time errors.
+
+  #if [[ "${MSYSTEM}" == "UCRT64" ]]; then
+    ### Test code to verify CSL install works
+    #MSYS2_ARG_CONV_EXCL='LOCALBASE=' \
+    #make -C deps VERBOSE=${_make_verbose} \
+      #LOCALBASE=${MINGW_PREFIX} install-csl
+
+    ### Test code to verify GMP install works
+    #MSYS2_ARG_CONV_EXCL='LOCALBASE=' \
+    #make -C deps VERBOSE=${_make_verbose} \
+      #LOCALBASE=${MINGW_PREFIX} install-gmp
+
+    ## Test code to verify LLVM install works
+    #export MSYS=winsymlinks:nativestrict
+    #MSYS2_ARG_CONV_EXCL='LOCALBASE=' \
+    #make -C deps VERBOSE=${_make_verbose} \
+      #LOCALBASE=${MINGW_PREFIX} install-llvm
+  #fi
+
+  cd "${srcdir}/build-${MSYSTEM}"
+  # option "-w" disables all warnings
+  env CFLAGS="$CFLAGS -w" CXXFLAGS="$CXXFLAGS -w" \
+    MSYS2_ARG_CONV_EXCL='LOCALBASE=' \
+    make VERBOSE=${_make_verbose} \
+      LOCALBASE=${MINGW_PREFIX} default # --jobs=1
+
+  if [[ "$_show_log_lockup_info" == "1" ]]; then
+    tty
+    msg2 "build finished"
+  fi
+}
+
+check() {
+  msg2 "check started"
+
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  cd test
+  make print-TESTS # list the tests
+  env PATH="${srcdir}/build-${MSYSTEM}/usr/bin:$PATH" \
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl \
+      --skip SuiteSparse stress Distributed InteractiveUtils namedtuple \
+      env Tar exceptions file numbers checked sorting threads \
+      FileWatching REPL LinearAlgebra Mmap || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl FileWatching || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl InteractiveUtils || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl namedtuple || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl env || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl Tar || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl exceptions || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl file || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl Mmap || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl numbers || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl checked || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl sorting || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl threads || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl REPL || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl SuiteSparse || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl Distributed || true
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl stress || true
+    # tests that take a long time to run
+    ../usr/bin/julia --check-bounds=yes --startup-file=no ./runtests.jl LinearAlgebra || true
+  find ../stdlib \( -name \*.cov -o -name \*.mem \) -delete
+  rm -fr ../stdlib/Artifacts/test/artifacts
+  if [[ "$_show_log_lockup_info" == "1" ]]; then
+    tty
+    msg2 "check finished"
+  fi
+}
+
+package_julia() {
+  depends=("${MINGW_PACKAGE_PREFIX}-gcc-libs")
+  backup=("${MINGW_PREFIX:1}"/etc/julia/startup.jl opt/julia/"${MINGW_PREFIX:1}"/etc/julia/startup.jl)
+
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  make DESTDIR="${pkgdir}" install \
+    prefix=/opt/julia${MINGW_PREFIX}
+
+  # Documentation is in the julia-docs package.
+  rm -rf "$pkgdir${MINGW_PREFIX}/share/"{doc,julia/doc}
+  # Man pages in share/man are duplicate.
+  #rm -rf "$pkgdir${MINGW_PREFIX}/share/man"
+
+  install -Dm644 "${srcdir}/julia.sh" "${pkgdir}${MINGW_PREFIX}/bin/julia"
+  install -Dm644 LICENSE.md "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE.md"
+}
+
+package_julia-docs() {
+  pkgdesc='Documentation and examples for Julia'
+  depends=(${MINGW_PACKAGE_PREFIX}-julia)
+
+  install -d "$pkgdir${MINGW_PREFIX}/share/doc"
+  cp -r ${_sourcedir}/doc "$pkgdir${MINGW_PREFIX}/share/doc/${_realname}"
+  rm -rf "$pkgdir${MINGW_PREFIX}/share/doc/${_realname}/man"
+  install -Dm644 ${_sourcedir}/LICENSE.md \
+    "$pkgdir${MINGW_PREFIX}/share/licenses/julia-docs/LICENSE.md"
+}
+
+# template start; name=mingw-w64-splitpkg-wrappers; version=1.0;
+# vim: set ft=bash :
+
+# generate wrappers
+for _name in "${pkgname[@]}"; do
+  _short="package_${_name#${MINGW_PACKAGE_PREFIX}-}"
+  _func="$(declare -f "${_short}")"
+  eval "${_func/#${_short}/package_${_name}}"
+done
+# template end;

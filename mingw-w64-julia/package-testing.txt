@@ -1,0 +1,16 @@
+# From an MSys2 MinGW command prompt run julia
+julia
+
+# From the Julia propmt enter smallest test program
+println("hello world")
+
+# Enter CTRL-D to exit from Julia
+
+# How to get version information
+julia> using InteractiveUtils
+
+# normal version info
+julia> versioninfo()
+
+# longer version info
+julia> versioninfo(verbose = true)
