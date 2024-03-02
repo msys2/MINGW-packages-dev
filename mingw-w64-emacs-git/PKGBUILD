@@ -60,6 +60,12 @@ build() {
   if [[ "$_enable_jit" == "yes" ]] ; then
       _extra_cfg="$_extra_cfg --with-native-compilation"
   fi
+
+  # -D_FORTIFY_SOURCE breaks build
+  CFLAGS=${CFLAGS//"-Wp,-D_FORTIFY_SOURCE=2"}
+  # -foptimize-sibling-calls breaks native compilation (GCC 13.1)
+  CFLAGS+=" -fno-optimize-sibling-calls"
+
   "${srcdir}/${_realname}/configure" \
     --prefix="${MINGW_PREFIX}" \
     --build="${MINGW_CHOST}" \
